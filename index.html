@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tree Matching Game</title>
+  <style>
+    :root {
+      --primary-color: #2c6e49;
+      --secondary-color: #4c956c;
+      --light-color: #fefee3;
+      --accent-color: #d68c45;
+      --correct-color: #4CAF50;
+      --incorrect-color: #f44336;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--light-color);
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .game-area {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .game-area {
+        flex-direction: column;
+      }
+    }
+
+    .leaves-container,
+    .ferns-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      color: var(--secondary-color);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .item {
+      padding: 10px;
+      background-color: var(--light-color);
+      border-radius: 5px;
+      border: 2px solid var(--secondary-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      min-height: 80px;
+      justify-content: flex-start;
+    }
+
+    .item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .item.selected {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+
+    .item.correct {
+      background-color: var(--correct-color);
+      border-color: var(--correct-color);
+    }
+
+    .item.incorrect {
+      background-color: var(--incorrect-color);
+      border-color: var(--incorrect-color);
+    }
+
+    .item-img {
+      height: 60px;
+      width: 60px;
+      object-fit: contain;
+      margin-right: 10px;
+    }
+
+    .item-name {
+      font-weight: bold;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .score-container {
+      background-color: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .score {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .instructions {
+      background-color: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .instructions p {
+      margin-bottom: 10px;
+    }
+
+    .credits {
+      font-size: 12px;
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Match the Leaf to the Seed/Fruit/Cone</h1>
+    <p>Test your knowledge of tree identification by matching the leaves to their corresponding seeds, fruits, or cones.
+    </p>
+  </header>
+
+  <div class="instructions">
+    <h3>How to Play:</h3>
+    <p>1. Click on a leaf from the left column.</p>
+    <p>2. Then click on the matching seed/fruit/cone in the right column.</p>
+    <p>3. If you're correct, both items will turn green. If wrong, they'll turn red briefly.</p>
+    <p>4. Try to match all 15 trees correctly!</p>
+
+    <div class="game-modes">
+      <h3>Game Modes:</h3>
+      <label><input type="radio" name="gameMode" value="names-both" checked> Show names with both leaf and
+        seed/fruit/cone</label><br>
+      <label><input type="radio" name="gameMode" value="names-leaf"> Show names only with leaves</label><br>
+      <label><input type="radio" name="gameMode" value="no-names"> No names shown (images only)</label>
+    </div>
+  </div>
+
+  <div class="game-container">
+    <div class="score-container">
+      <p>Correct Matches: <span class="score" id="score">0</span> / 15</p>
+    </div>
+
+    <div class="game-area">
+      <div class="leaves-container">
+        <h2>Leaves & Needles</h2>
+        <div id="leaves-list"></div>
+      </div>
+
+      <div class="ferns-container">
+        <h2>Seeds, Fruits & Cones</h2>
+        <div id="ferns-list"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="reset-btn">Reset Game</button>
+      <button id="hint-btn">Show Hint</button>
+    </div>
+  </div>
+
+  <div class="credits">
+    <p>Based on the tree identification chart featuring 15 common tree species.</p>
+  </div>
+
+  <script>
+    // Tree data with German and English names
+    const trees = [
+      { id: 'ahorn', german: 'Ahorn', english: 'Maple' },
+      { id: 'birke', german: 'Birke', english: 'Birch' },
+      { id: 'eberesche', german: 'Eberesche', english: 'Rowan/Mountain Ash' },
+      { id: 'eiche', german: 'Eiche', english: 'Oak' },
+      { id: 'esche', german: 'Esche', english: 'Ash' },
+      { id: 'fichte', german: 'Fichte', english: 'Spruce' },
+      { id: 'hainbuche', german: 'Hainbuche', english: 'Hornbeam' },
+      { id: 'kastanie', german: 'Kastanie', english: 'Chestnut' },
+      { id: 'laerche', german: 'Lärche', english: 'Larch' },
+      { id: 'linde', german: 'Linde', english: 'Linden/Lime' },
+      { id: 'platane', german: 'Platane', english: 'Plane tree' },
+      { id: 'rotbuche', german: 'Rotbuche', english: 'Beech' },
+      { id: 'tanne', german: 'Tanne', english: 'Fir' },
+      { id: 'wacholder', german: 'Wacholder', english: 'Juniper' },
+      { id: 'kiefer', german: 'Kiefer', english: 'Pine' }
+    ];
+
+    // Game state
+    let selectedLeaf = null;
+    let selectedFern = null;
+    let correctMatches = [];
+    let score = 0;
+
+    // DOM elements
+    const leavesList = document.getElementById('leaves-list');
+    const fernsList = document.getElementById('ferns-list');
+    const scoreElement = document.getElementById('score');
+    const resetButton = document.getElementById('reset-btn');
+    const hintButton = document.getElementById('hint-btn');
+
+    // Functions
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function createTreeItem(tree, type) {
+      const item = document.createElement('div');
+      item.classList.add('item');
+      item.dataset.id = tree.id;
+      item.dataset.type = type;
+
+      const img = document.createElement('img');
+      img.classList.add('item-img');
+      img.src = `images/${tree.id}_${type}.png`;
+      img.alt = `${tree.german} ${type}`;
+
+      const nameSpan = document.createElement('span');
+      nameSpan.classList.add('item-name');
+      nameSpan.textContent = `${tree.german} (${tree.english})`;
+
+      item.appendChild(img);
+
+      // Add names based on the selected game mode
+      const gameMode = document.querySelector('input[name="gameMode"]:checked').value;
+
+      if (gameMode === "names-both" || (gameMode === "names-leaf" && type === "leaf")) {
+        item.appendChild(nameSpan);
+      }
+
+      if (correctMatches.includes(tree.id)) {
+        item.classList.add('correct');
+        item.style.pointerEvents = 'none';
+      } else {
+        item.addEventListener('click', handleItemClick);
+      }
+
+      return item;
+    }
+
+    function handleItemClick(e) {
+      const clickedItem = e.currentTarget;
+      const itemId = clickedItem.dataset.id;
+      const itemType = clickedItem.dataset.type;
+
+      if (itemType === 'leaf') {
+        // Deselect previously selected leaf
+        if (selectedLeaf) {
+          selectedLeaf.classList.remove('selected');
+        }
+
+        if (selectedLeaf === clickedItem) {
+          selectedLeaf = null;
+        } else {
+          clickedItem.classList.add('selected');
+          selectedLeaf = clickedItem;
+        }
+      } else if (itemType === 'fern') {
+        // Deselect previously selected fern
+        if (selectedFern) {
+          selectedFern.classList.remove('selected');
+        }
+
+        if (selectedFern === clickedItem) {
+          selectedFern = null;
+        } else {
+          clickedItem.classList.add('selected');
+          selectedFern = clickedItem;
+        }
+      }
+
+      // Check if both a leaf and fern are selected
+      if (selectedLeaf && selectedFern) {
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      const leafId = selectedLeaf.dataset.id;
+      const fernId = selectedFern.dataset.id;
+
+      if (leafId === fernId) {
+        // Correct match
+        selectedLeaf.classList.add('correct');
+        selectedFern.classList.add('correct');
+        selectedLeaf.classList.remove('selected');
+        selectedFern.classList.remove('selected');
+
+        selectedLeaf.style.pointerEvents = 'none';
+        selectedFern.style.pointerEvents = 'none';
+
+        correctMatches.push(leafId);
+        score++;
+        scoreElement.textContent = score;
+
+        // Check if game is complete
+        if (score === trees.length) {
+          setTimeout(() => {
+            alert('Congratulations! You matched all trees correctly!');
+          }, 500);
+        }
+      } else {
+        // Incorrect match
+        selectedLeaf.classList.add('incorrect');
+        selectedFern.classList.add('incorrect');
+
+        setTimeout(() => {
+          selectedLeaf.classList.remove('incorrect');
+          selectedFern.classList.remove('incorrect');
+          selectedLeaf.classList.remove('selected');
+          selectedFern.classList.remove('selected');
+          selectedLeaf = null;
+          selectedFern = null;
+        }, 1000);
+      }
+    }
+
+    function showHint() {
+      if (selectedLeaf && !selectedFern) {
+        const leafId = selectedLeaf.dataset.id;
+        const fernItems = document.querySelectorAll('.ferns-container .item');
+
+        fernItems.forEach(item => {
+          if (item.dataset.id === leafId) {
+            item.style.border = '3px dashed orange';
+            setTimeout(() => {
+              item.style.border = '';
+            }, 2000);
+          }
+        });
+      } else if (!selectedLeaf && selectedFern) {
+        const fernId = selectedFern.dataset.id;
+        const leafItems = document.querySelectorAll('.leaves-container .item');
+
+        leafItems.forEach(item => {
+          if (item.dataset.id === fernId) {
+            item.style.border = '3px dashed orange';
+            setTimeout(() => {
+              item.style.border = '';
+            }, 2000);
+          }
+        });
+      } else {
+        alert('Select either a leaf or a seed/fruit/cone first to get a hint for its match.');
+      }
+    }
+
+    function initializeGame() {
+      // Clear previous game
+      leavesList.innerHTML = '';
+      fernsList.innerHTML = '';
+      selectedLeaf = null;
+      selectedFern = null;
+      correctMatches = [];
+      score = 0;
+      scoreElement.textContent = score;
+
+      // Create shuffled arrays of trees
+      const shuffledLeaves = shuffleArray(trees);
+      const shuffledFerns = shuffleArray(trees);
+
+      // Create leaf items
+      shuffledLeaves.forEach(tree => {
+        const leafItem = createTreeItem(tree, 'leaf');
+        leavesList.appendChild(leafItem);
+      });
+
+      // Create fern items
+      shuffledFerns.forEach(tree => {
+        const fernItem = createTreeItem(tree, 'fern');
+        fernsList.appendChild(fernItem);
+      });
+    }
+
+    // Event listeners
+    resetButton.addEventListener('click', initializeGame);
+    hintButton.addEventListener('click', showHint);
+
+    // Add event listeners for game mode radio buttons
+    document.querySelectorAll('input[name="gameMode"]').forEach(radio => {
+      radio.addEventListener('change', initializeGame);
+    });
+
+    // Initialize game on page load
+    window.addEventListener('DOMContentLoaded', initializeGame);
+  </script>
+</body>
+
+</html>
