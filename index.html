@@ -31,47 +31,41 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        .leaf-image {
-            max-width: 300px;
-            max-height: 300px;
-            margin: 0 auto;
-            display: block;
-            border: 3px solid #2a7d2a;
-            border-radius: 5px;
+        .leaf-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2a7d2a;
+            margin-bottom: 20px;
         }
         .options-container {
             display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 15px;
         }
         .option {
-            flex: 1;
-            min-width: 150px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            position: relative;
-        }
-        .option:hover {
-            transform: scale(1.05);
-        }
-        .option.correct {
-            border: 3px solid #4CAF50;
-        }
-        .option.incorrect {
-            border: 3px solid #F44336;
-        }
-        .option img {
-            width: 100%;
-            height: 200px;
-            object-fit: contain;
+            padding: 15px;
             border: 2px solid #ccc;
             border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+        .option:hover {
+            background-color: #f0f8f0;
+            transform: translateY(-2px);
+        }
+        .option.correct {
+            border-color: #4CAF50;
+            background-color: #dff2bf;
+        }
+        .option.incorrect {
+            border-color: #F44336;
+            background-color: #ffbaba;
         }
         .controls {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
+            margin-top: 30px;
         }
         button {
             background-color: #2a7d2a;
@@ -91,10 +85,11 @@
         }
         .feedback {
             text-align: center;
-            margin: 15px 0;
+            margin: 20px 0;
             padding: 10px;
             border-radius: 5px;
             font-weight: bold;
+            font-size: 18px;
         }
         .feedback.correct {
             background-color: #dff2bf;
@@ -111,98 +106,67 @@
             font-weight: bold;
             color: #2a7d2a;
         }
-        .loading {
-            text-align: center;
-            margin: 50px;
-            font-size: 18px;
-        }
-        #error-message {
-            background-color: #ffbaba;
-            color: #D8000C;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-            display: none;
-        }
-        /* Progress bar styling */
-        .progress-container {
-            margin-bottom: 20px;
-        }
-        .progress-bar {
-            height: 10px;
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            margin-top: 5px;
-        }
-        .progress {
-            height: 100%;
-            background-color: #2a7d2a;
-            border-radius: 5px;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
     </style>
 </head>
 <body>
     <div class="quiz-container">
         <h1>Leaf and Fern Matching Quiz</h1>
-        <div id="error-message"></div>
+        <div class="score-container">Score: <span id="score">0</span>/15</div>
         
-        <div id="loading" class="loading">
-            <p>Loading images...</p>
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div id="progress" class="progress"></div>
-                </div>
-                <div id="progress-text">0/0 images found</div>
+        <div id="question-section">
+            <div class="question-container">
+                <h2>Match this leaf with its corresponding fern:</h2>
+                <div id="leaf-name" class="leaf-name"></div>
             </div>
+            
+            <div class="options-container" id="options">
+                <!-- Options will be dynamically loaded here -->
+            </div>
+            
+            <div id="feedback" class="feedback" style="display: none;"></div>
         </div>
         
-        <div id="quiz-content" style="display: none;">
-            <div class="score-container">Score: <span id="score">0</span>/<span id="total-questions">0</span></div>
-            
-            <div id="question-section">
-                <div class="question-container">
-                    <h2>Match this leaf with its corresponding fern:</h2>
-                    <img id="leaf-image" class="leaf-image" src="" alt="Leaf image">
-                </div>
-                
-                <div class="options-container" id="options">
-                    <!-- Options will be dynamically loaded here -->
-                </div>
-                
-                <div id="feedback" class="feedback" style="display: none;"></div>
-            </div>
-            
-            <div id="game-over" class="game-over" style="display: none;">
-                Game Over! Your final score: <span id="final-score">0</span>/<span id="final-total">0</span>
-            </div>
-            
-            <div class="controls">
-                <button id="prev-btn" disabled>Previous</button>
-                <button id="next-btn" disabled>Next</button>
-                <button id="restart-btn">Restart Game</button>
-            </div>
+        <div id="game-over" class="game-over" style="display: none;">
+            Game Over! Your final score: <span id="final-score">0</span>/15
+        </div>
+        
+        <div class="controls">
+            <button id="prev-btn" disabled>Previous</button>
+            <button id="next-btn" disabled>Next</button>
+            <button id="restart-btn">Restart Game</button>
         </div>
     </div>
 
     <script>
+        // Plant data - each object has a leaf name and its corresponding fern
+        const plantData = [
+            { leaf: "Maple Leaf", fern: "Maple Fern" },
+            { leaf: "Oak Leaf", fern: "Oak Fern" },
+            { leaf: "Pine Leaf", fern: "Pine Fern" },
+            { leaf: "Ficus Leaf", fern: "Ficus Fern" },
+            { leaf: "Palm Leaf", fern: "Palm Fern" },
+            { leaf: "Cedar Leaf", fern: "Cedar Fern" },
+            { leaf: "Elm Leaf", fern: "Elm Fern" },
+            { leaf: "Spruce Leaf", fern: "Spruce Fern" },
+            { leaf: "Redwood Leaf", fern: "Redwood Fern" },
+            { leaf: "Ginkgo Leaf", fern: "Ginkgo Fern" },
+            { leaf: "Aspen Leaf", fern: "Aspen Fern" },
+            { leaf: "Holly Leaf", fern: "Holly Fern" },
+            { leaf: "Birch Leaf", fern: "Birch Fern" },
+            { leaf: "Willow Leaf", fern: "Willow Fern" },
+            { leaf: "Acorn Leaf", fern: "Acorn Fern" }
+        ];
+        
         // Game state
-        let plantNames = [];
-        let plants = [];
+        let shuffledPlants = [];
         let currentQuestionIndex = 0;
         let score = 0;
         let answeredQuestions = {};
         
         // DOM elements
-        const loadingElement = document.getElementById('loading');
-        const quizContent = document.getElementById('quiz-content');
-        const errorMessage = document.getElementById('error-message');
         const scoreElement = document.getElementById('score');
-        const totalQuestionsElement = document.getElementById('total-questions');
         const finalScoreElement = document.getElementById('final-score');
-        const finalTotalElement = document.getElementById('final-total');
-        const leafImage = document.getElementById('leaf-image');
+        const leafNameElement = document.getElementById('leaf-name');
         const optionsContainer = document.getElementById('options');
         const feedbackElement = document.getElementById('feedback');
         const questionSection = document.getElementById('question-section');
@@ -210,99 +174,6 @@
         const prevButton = document.getElementById('prev-btn');
         const nextButton = document.getElementById('next-btn');
         const restartButton = document.getElementById('restart-btn');
-        const progressBar = document.getElementById('progress');
-        const progressText = document.getElementById('progress-text');
-        
-        // Initialize the application
-        function initApp() {
-            // Show loading indicator
-            loadingElement.style.display = 'block';
-            quizContent.style.display = 'none';
-            errorMessage.style.display = 'none';
-            
-            // Detect plant names from the available image files
-            detectPlantNames()
-                .then(names => {
-                    plantNames = names;
-                    
-                    if (plantNames.length === 0) {
-                        throw new Error("No matching leaf and fern pairs found in the images directory.");
-                    }
-                    
-                    totalQuestionsElement.textContent = plantNames.length;
-                    finalTotalElement.textContent = plantNames.length;
-                    
-                    // Hide loading, show quiz
-                    loadingElement.style.display = 'none';
-                    quizContent.style.display = 'block';
-                    
-                    // Start the game
-                    initGame();
-                })
-                .catch(error => {
-                    // Show error message
-                    loadingElement.style.display = 'none';
-                    errorMessage.style.display = 'block';
-                    errorMessage.textContent = 'Error: ' + error.message;
-                    console.error('Error:', error);
-                });
-        }
-        
-        // Detect available plant names by checking image existence
-        async function detectPlantNames() {
-            // Since we can't list directory contents in the browser,
-            // we'll try to find leaf-fern pairs by checking if images exist
-            
-            // This is the pattern of image names we'll check
-            const possiblePlants = [
-                'acorn', 'maple', 'oak', 'birch', 'pine',
-                'willow', 'ficus', 'palm', 'cedar', 'elm',
-                'spruce', 'redwood', 'ginkgo', 'aspen', 'holly',
-                // Add more potential plant names here
-            ];
-            
-            const validPlants = [];
-            const totalToCheck = possiblePlants.length;
-            let checkedCount = 0;
-            
-            progressBar.style.width = '0%';
-            progressText.textContent = `0/${totalToCheck} images checked`;
-            
-            // Check each possible plant name
-            for (const plant of possiblePlants) {
-                try {
-                    // Check if both leaf and fern images exist
-                    const leafExists = await imageExists(`/images/${plant}_leaf.png`);
-                    const fernExists = await imageExists(`/images/${plant}_fern.png`);
-                    
-                    // If both exist, add to valid plants list
-                    if (leafExists && fernExists) {
-                        validPlants.push(plant);
-                    }
-                    
-                    // Update progress
-                    checkedCount++;
-                    const percentage = (checkedCount / totalToCheck) * 100;
-                    progressBar.style.width = percentage + '%';
-                    progressText.textContent = `${validPlants.length} pairs found (${checkedCount}/${totalToCheck} checked)`;
-                    
-                } catch (error) {
-                    console.error(`Error checking ${plant} images:`, error);
-                }
-            }
-            
-            return validPlants;
-        }
-        
-        // Check if an image exists
-        function imageExists(url) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => resolve(true);
-                img.onerror = () => resolve(false);
-                img.src = url;
-            });
-        }
         
         // Initialize the game
         function initGame() {
@@ -319,7 +190,7 @@
             nextButton.disabled = true;
             
             // Shuffle plants for a new game
-            plants = shuffleArray([...plantNames]);
+            shuffledPlants = shuffleArray([...plantData]);
             
             // Load first question
             loadQuestion();
@@ -327,11 +198,10 @@
         
         // Load question and options
         function loadQuestion() {
-            const currentPlant = plants[currentQuestionIndex];
+            const currentPlant = shuffledPlants[currentQuestionIndex];
             
-            // Show the current leaf image
-            leafImage.src = `/images/${currentPlant}_leaf.png`;
-            leafImage.alt = `${currentPlant} leaf`;
+            // Show the current leaf name
+            leafNameElement.textContent = currentPlant.leaf;
             
             // Create options (one correct, two incorrect)
             const optionsPlants = getOptions(currentPlant);
@@ -340,19 +210,13 @@
             optionsContainer.innerHTML = '';
             
             // Add new options
-            optionsPlants.forEach(plant => {
+            optionsPlants.forEach(fernName => {
                 const optionElement = document.createElement('div');
                 optionElement.classList.add('option');
-                
-                const optionImage = document.createElement('img');
-                optionImage.src = `/images/${plant}_fern.png`;
-                optionImage.alt = `${plant} fern`;
-                
-                optionElement.appendChild(optionImage);
-                optionElement.setAttribute('data-plant', plant);
+                optionElement.textContent = fernName;
                 
                 // Add click handler
-                optionElement.addEventListener('click', () => selectOption(optionElement, plant, currentPlant));
+                optionElement.addEventListener('click', () => selectOption(optionElement, fernName, currentPlant.fern));
                 
                 optionsContainer.appendChild(optionElement);
             });
@@ -371,26 +235,27 @@
         }
         
         // Get options (one correct, two random incorrect)
-        function getOptions(correctPlant) {
-            // Get incorrect options (plants that aren't the correct one)
-            const incorrectOptions = plantNames.filter(plant => plant !== correctPlant);
+        function getOptions(currentPlant) {
+            // Get incorrect options (ferns that aren't the correct one)
+            const incorrectOptions = plantData
+                .filter(plant => plant.fern !== currentPlant.fern)
+                .map(plant => plant.fern);
             
-            // Shuffle and take two or fewer if there aren't enough options
-            const numIncorrectToSelect = Math.min(2, incorrectOptions.length);
-            const selectedIncorrect = shuffleArray(incorrectOptions).slice(0, numIncorrectToSelect);
+            // Shuffle and take two
+            const selectedIncorrect = shuffleArray(incorrectOptions).slice(0, 2);
             
             // Combine with correct and shuffle
-            return shuffleArray([correctPlant, ...selectedIncorrect]);
+            return shuffleArray([currentPlant.fern, ...selectedIncorrect]);
         }
         
         // Handle option selection
-        function selectOption(optionElement, selectedPlant, correctPlant) {
+        function selectOption(optionElement, selectedFern, correctFern) {
             // If already answered, do nothing
             if (answeredQuestions[currentQuestionIndex]) {
                 return;
             }
             
-            const isCorrect = selectedPlant === correctPlant;
+            const isCorrect = selectedFern === correctFern;
             
             // Mark the option as correct/incorrect
             optionElement.classList.add(isCorrect ? 'correct' : 'incorrect');
@@ -399,7 +264,7 @@
             if (!isCorrect) {
                 const options = optionsContainer.querySelectorAll('.option');
                 options.forEach(option => {
-                    if (option.getAttribute('data-plant') === correctPlant) {
+                    if (option.textContent === correctFern) {
                         option.classList.add('correct');
                     }
                 });
@@ -416,7 +281,7 @@
             
             // Save the answer
             answeredQuestions[currentQuestionIndex] = {
-                selectedPlant,
+                selectedFern,
                 isCorrect
             };
             
@@ -424,7 +289,7 @@
             nextButton.disabled = false;
             
             // Check if game is over
-            if (Object.keys(answeredQuestions).length === plants.length) {
+            if (Object.keys(answeredQuestions).length === shuffledPlants.length) {
                 setTimeout(() => {
                     finalScoreElement.textContent = score;
                     questionSection.style.display = 'none';
@@ -448,13 +313,13 @@
         // Show previous answer for a revisited question
         function showPreviousAnswer() {
             const answer = answeredQuestions[currentQuestionIndex];
+            const correctFern = shuffledPlants[currentQuestionIndex].fern;
             const options = optionsContainer.querySelectorAll('.option');
             
             options.forEach(option => {
-                const plant = option.getAttribute('data-plant');
-                if (plant === plants[currentQuestionIndex]) {
+                if (option.textContent === correctFern) {
                     option.classList.add('correct');
-                } else if (plant === answer.selectedPlant && !answer.isCorrect) {
+                } else if (option.textContent === answer.selectedFern && !answer.isCorrect) {
                     option.classList.add('incorrect');
                 }
             });
@@ -473,7 +338,7 @@
         
         // Navigate to next question
         function goToNextQuestion() {
-            if (currentQuestionIndex < plants.length - 1) {
+            if (currentQuestionIndex < shuffledPlants.length - 1) {
                 currentQuestionIndex++;
                 loadQuestion();
             }
@@ -494,8 +359,8 @@
         nextButton.addEventListener('click', goToNextQuestion);
         restartButton.addEventListener('click', initGame);
         
-        // Start the application
-        document.addEventListener('DOMContentLoaded', initApp);
+        // Start the game
+        document.addEventListener('DOMContentLoaded', initGame);
     </script>
 </body>
 </html>
