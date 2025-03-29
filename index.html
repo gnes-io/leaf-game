@@ -1,366 +1,592 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaf and Fern Matching Quiz</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f0f8f0;
-        }
-        .quiz-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #2a7d2a;
-            text-align: center;
-        }
-        .score-container {
-            text-align: right;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-        .question-container {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .leaf-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2a7d2a;
-            margin-bottom: 20px;
-        }
-        .options-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .option {
-            padding: 15px;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 18px;
-        }
-        .option:hover {
-            background-color: #f0f8f0;
-            transform: translateY(-2px);
-        }
-        .option.correct {
-            border-color: #4CAF50;
-            background-color: #dff2bf;
-        }
-        .option.incorrect {
-            border-color: #F44336;
-            background-color: #ffbaba;
-        }
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-        button {
-            background-color: #2a7d2a;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #1c591c;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .feedback {
-            text-align: center;
-            margin: 20px 0;
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        .feedback.correct {
-            background-color: #dff2bf;
-            color: #4F8A10;
-        }
-        .feedback.incorrect {
-            background-color: #ffbaba;
-            color: #D8000C;
-        }
-        .game-over {
-            text-align: center;
-            margin: 20px 0;
-            font-size: 24px;
-            font-weight: bold;
-            color: #2a7d2a;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plants R Cool</title>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --background-color: #ecf0f1;
+      --card-color: #ffffff;
+      --text-color: #333333;
+      --success-color: #2ecc71;
+      --error-color: #e74c3c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--background-color);
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .score-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      background-color: var(--primary-color);
+      padding: 10px 15px;
+      border-radius: 8px;
+      color: white;
+    }
+
+    .score {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .options {
+      display: flex;
+      gap: 15px;
+    }
+
+    .toggle-names {
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .toggle-names:hover {
+      background-color: #2980b9;
+    }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .leaf-container {
+      background-color: var(--card-color);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .leaf-name {
+      color: var(--primary-color);
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      transition: opacity 0.3s;
+    }
+
+    .leaf-image {
+      max-width: 100%;
+      max-height: 250px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .ferns-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .fern-option {
+      background-color: var(--card-color);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .fern-option:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .fern-option.correct {
+      background-color: var(--success-color);
+    }
+
+    .fern-option.incorrect {
+      background-color: var(--error-color);
+    }
+
+    .fern-image {
+      width: 100%;
+      height: 120px;
+      object-fit: contain;
+    }
+
+    .zoom-icon {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .nav-button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .nav-button:hover {
+      background-color: #34495e;
+    }
+
+    .nav-button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+
+    .feedback {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+      height: 30px;
+    }
+
+    .feedback.correct {
+      color: var(--success-color);
+    }
+
+    .feedback.incorrect {
+      color: var(--error-color);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: var(--card-color);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 80%;
+      max-height: 80%;
+      text-align: center;
+    }
+
+    .modal-image {
+      max-width: 100%;
+      max-height: 70vh;
+    }
+
+    .close-modal {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      margin-top: 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .results-container {
+      display: none;
+      background-color: var(--card-color);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .results-title {
+      color: var(--primary-color);
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .final-score {
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+
+    .score-highlight {
+      color: var(--secondary-color);
+      font-weight: bold;
+      font-size: 30px;
+    }
+
+    .restart-button {
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .restart-button:hover {
+      background-color: #2980b9;
+    }
+
+    @media (max-width: 600px) {
+      .ferns-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="quiz-container">
-        <h1>Leaf and Fern Matching Quiz</h1>
-        <div class="score-container">Score: <span id="score">0</span>/15</div>
-        
-        <div id="question-section">
-            <div class="question-container">
-                <h2>Match this leaf with its corresponding fern:</h2>
-                <div id="leaf-name" class="leaf-name"></div>
-            </div>
-            
-            <div class="options-container" id="options">
-                <!-- Options will be dynamically loaded here -->
-            </div>
-            
-            <div id="feedback" class="feedback" style="display: none;"></div>
-        </div>
-        
-        <div id="game-over" class="game-over" style="display: none;">
-            Game Over! Your final score: <span id="final-score">0</span>/15
-        </div>
-        
-        <div class="controls">
-            <button id="prev-btn" disabled>Previous</button>
-            <button id="next-btn" disabled>Next</button>
-            <button id="restart-btn">Restart Game</button>
-        </div>
+  <div class="header">
+    <h1 class="title">Leaf-Fern Matching Game</h1>
+  </div>
+
+  <div class="score-container">
+    <div class="score">Score: <span id="current-score">0</span>/<span id="total-questions">0</span></div>
+    <div class="options">
+      <button id="toggle-names" class="toggle-names">Hide Leaf Names</button>
+    </div>
+  </div>
+
+  <div id="game-container" class="game-container">
+    <div class="leaf-container">
+      <h2 id="leaf-name" class="leaf-name">Name of Leaf</h2>
+      <img id="leaf-image" class="leaf-image" src="" alt="Leaf image">
     </div>
 
-    <script>
-        // Plant data - each object has a leaf name and its corresponding fern
-        const plantData = [
-            { leaf: "Maple Leaf", fern: "Maple Fern" },
-            { leaf: "Oak Leaf", fern: "Oak Fern" },
-            { leaf: "Pine Leaf", fern: "Pine Fern" },
-            { leaf: "Ficus Leaf", fern: "Ficus Fern" },
-            { leaf: "Palm Leaf", fern: "Palm Fern" },
-            { leaf: "Cedar Leaf", fern: "Cedar Fern" },
-            { leaf: "Elm Leaf", fern: "Elm Fern" },
-            { leaf: "Spruce Leaf", fern: "Spruce Fern" },
-            { leaf: "Redwood Leaf", fern: "Redwood Fern" },
-            { leaf: "Ginkgo Leaf", fern: "Ginkgo Fern" },
-            { leaf: "Aspen Leaf", fern: "Aspen Fern" },
-            { leaf: "Holly Leaf", fern: "Holly Fern" },
-            { leaf: "Birch Leaf", fern: "Birch Fern" },
-            { leaf: "Willow Leaf", fern: "Willow Fern" },
-            { leaf: "Acorn Leaf", fern: "Acorn Fern" }
-        ];
-        
-        // Game state
-        let shuffledPlants = [];
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let answeredQuestions = {};
-        
-        // DOM elements
-        const scoreElement = document.getElementById('score');
-        const finalScoreElement = document.getElementById('final-score');
-        const leafNameElement = document.getElementById('leaf-name');
-        const optionsContainer = document.getElementById('options');
-        const feedbackElement = document.getElementById('feedback');
-        const questionSection = document.getElementById('question-section');
-        const gameOverSection = document.getElementById('game-over');
-        const prevButton = document.getElementById('prev-btn');
-        const nextButton = document.getElementById('next-btn');
-        const restartButton = document.getElementById('restart-btn');
-        
-        // Initialize the game
-        function initGame() {
-            // Reset game state
-            score = 0;
-            currentQuestionIndex = 0;
-            answeredQuestions = {};
-            
-            // Update UI
-            scoreElement.textContent = score;
-            questionSection.style.display = 'block';
-            gameOverSection.style.display = 'none';
-            prevButton.disabled = true;
-            nextButton.disabled = true;
-            
-            // Shuffle plants for a new game
-            shuffledPlants = shuffleArray([...plantData]);
-            
-            // Load first question
-            loadQuestion();
+    <div id="ferns-container" class="ferns-container">
+      <!-- Fern options will be dynamically added here -->
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+
+    <div class="navigation">
+      <button id="back-button" class="nav-button" disabled>
+        ← Back
+      </button>
+      <button id="next-button" class="nav-button" disabled>
+        Next →
+      </button>
+    </div>
+  </div>
+
+  <div id="results-container" class="results-container">
+    <h2 class="results-title">Game Complete!</h2>
+    <p class="final-score">Your score: <span id="final-score" class="score-highlight">0</span>/<span
+        id="max-score">0</span></p>
+    <button id="restart-button" class="restart-button">Play Again</button>
+  </div>
+
+  <div id="zoom-modal" class="modal">
+    <div class="modal-content">
+      <img id="modal-image" class="modal-image" src="" alt="Zoomed image">
+      <button id="close-modal" class="close-modal">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // Game state
+    let pairs = [];
+    let currentIndex = 0;
+    let score = 0;
+    let showNames = true;
+    let hasAnswered = false;
+    let gameCompleted = false;
+
+    // Define all tree types from the image (15 total)
+    const allTreeTypes = [
+      'kiefer',   // Pine
+      'tanne',    // Fir
+      'laerche',  // Larch
+      'fichte',   // Spruce
+      'wacholder', // Juniper
+      'eiche',    // Oak
+      'rotbuche', // Beech
+      'hainbuche', // Hornbeam
+      'birke',    // Birch
+      'kastanie', // Chestnut
+      'linde',    // Linden/Lime tree
+      'eberesche', // Rowan/Mountain ash
+      'esche',    // Ash
+      'ahorn',    // Maple
+      'platane'   // Plane tree
+    ];
+
+    // Initialize the game
+    function initGame() {
+      // Create pairs based on all tree types
+      pairs = [];
+      allTreeTypes.forEach(tree => {
+        pairs.push({
+          leaf: `${tree}_leaf`,
+          fern: `${tree}_fern`
+        });
+      });
+
+      // Randomize the order of pairs
+      shuffleArray(pairs);
+
+      // Update total questions display
+      document.getElementById('total-questions').textContent = pairs.length;
+      document.getElementById('max-score').textContent = pairs.length;
+
+      // Reset game state
+      currentIndex = 0;
+      score = 0;
+      document.getElementById('current-score').textContent = score;
+      hasAnswered = false;
+      gameCompleted = false;
+
+      // Show game container and hide results
+      document.getElementById('game-container').style.display = 'flex';
+      document.getElementById('results-container').style.display = 'none';
+
+      // Load the first question
+      loadQuestion();
+    }
+
+    // Fisher-Yates shuffle algorithm
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Format the display name from the file name
+    function formatDisplayName(filename) {
+      const parts = filename.split('_');
+      return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+    }
+
+    // Load a question
+    function loadQuestion() {
+      if (currentIndex >= pairs.length) {
+        showResults();
+        return;
+      }
+
+      const currentPair = pairs[currentIndex];
+
+      // Set leaf image and name
+      const leafImage = document.getElementById('leaf-image');
+      leafImage.src = `images/${currentPair.leaf}.png`;
+      leafImage.alt = formatDisplayName(currentPair.leaf);
+
+      document.getElementById('leaf-name').textContent = formatDisplayName(currentPair.leaf);
+
+      // Clear previous fern options
+      const fernsContainer = document.getElementById('ferns-container');
+      fernsContainer.innerHTML = '';
+
+      // Create array of fern options (correct one + 3 random incorrect ones)
+      const correctFern = currentPair.fern;
+      let fernOptions = [correctFern];
+
+      // Add incorrect options
+      while (fernOptions.length < 4) {
+        const randomIndex = Math.floor(Math.random() * pairs.length);
+        const randomFern = pairs[randomIndex].fern;
+
+        // Make sure we don't add duplicates
+        if (randomFern !== correctFern && !fernOptions.includes(randomFern)) {
+          fernOptions.push(randomFern);
         }
-        
-        // Load question and options
-        function loadQuestion() {
-            const currentPlant = shuffledPlants[currentQuestionIndex];
-            
-            // Show the current leaf name
-            leafNameElement.textContent = currentPlant.leaf;
-            
-            // Create options (one correct, two incorrect)
-            const optionsPlants = getOptions(currentPlant);
-            
-            // Clear previous options
-            optionsContainer.innerHTML = '';
-            
-            // Add new options
-            optionsPlants.forEach(fernName => {
-                const optionElement = document.createElement('div');
-                optionElement.classList.add('option');
-                optionElement.textContent = fernName;
-                
-                // Add click handler
-                optionElement.addEventListener('click', () => selectOption(optionElement, fernName, currentPlant.fern));
-                
-                optionsContainer.appendChild(optionElement);
-            });
-            
-            // Update buttons
-            prevButton.disabled = currentQuestionIndex === 0;
-            nextButton.disabled = !answeredQuestions[currentQuestionIndex];
-            
-            // Clear feedback
-            hideFeedback();
-            
-            // If this question was answered before, show the answer
-            if (answeredQuestions[currentQuestionIndex]) {
-                showPreviousAnswer();
-            }
+      }
+
+      // Shuffle the options
+      shuffleArray(fernOptions);
+
+      // Create the fern option elements
+      fernOptions.forEach((fern, index) => {
+        const fernOption = document.createElement('div');
+        fernOption.className = 'fern-option';
+        fernOption.dataset.fern = fern;
+
+        const fernImage = document.createElement('img');
+        fernImage.src = `images/${fern}.png`;
+        fernImage.alt = formatDisplayName(fern);
+        fernImage.className = 'fern-image';
+
+        const zoomIcon = document.createElement('div');
+        zoomIcon.className = 'zoom-icon';
+        zoomIcon.innerHTML = '🔍';
+        zoomIcon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showZoomedImage(`images/${fern}.png`);
+        });
+
+        fernOption.appendChild(fernImage);
+        fernOption.appendChild(zoomIcon);
+
+        fernOption.addEventListener('click', () => {
+          if (!hasAnswered) {
+            checkAnswer(fern);
+          }
+        });
+
+        fernsContainer.appendChild(fernOption);
+      });
+
+      // Reset feedback and button states
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('feedback').className = 'feedback';
+
+      document.getElementById('back-button').disabled = currentIndex === 0;
+      document.getElementById('next-button').disabled = true;
+
+      hasAnswered = false;
+    }
+
+    // Check the selected answer
+    function checkAnswer(selectedFern) {
+      const correctFern = pairs[currentIndex].fern;
+      const isCorrect = selectedFern === correctFern;
+
+      if (isCorrect) {
+        score++;
+        document.getElementById('current-score').textContent = score;
+        document.getElementById('feedback').textContent = 'Correct!';
+        document.getElementById('feedback').className = 'feedback correct';
+      } else {
+        document.getElementById('feedback').textContent = 'Incorrect!';
+        document.getElementById('feedback').className = 'feedback incorrect';
+      }
+
+      // Highlight the correct and incorrect options
+      const fernOptions = document.querySelectorAll('.fern-option');
+      fernOptions.forEach(option => {
+        if (option.dataset.fern === correctFern) {
+          option.classList.add('correct');
+        } else if (option.dataset.fern === selectedFern && !isCorrect) {
+          option.classList.add('incorrect');
         }
-        
-        // Get options (one correct, two random incorrect)
-        function getOptions(currentPlant) {
-            // Get incorrect options (ferns that aren't the correct one)
-            const incorrectOptions = plantData
-                .filter(plant => plant.fern !== currentPlant.fern)
-                .map(plant => plant.fern);
-            
-            // Shuffle and take two
-            const selectedIncorrect = shuffleArray(incorrectOptions).slice(0, 2);
-            
-            // Combine with correct and shuffle
-            return shuffleArray([currentPlant.fern, ...selectedIncorrect]);
+      });
+
+      hasAnswered = true;
+      document.getElementById('next-button').disabled = false;
+    }
+
+    // Show the zoomed image modal
+    function showZoomedImage(imageSrc) {
+      const modal = document.getElementById('zoom-modal');
+      const modalImage = document.getElementById('modal-image');
+
+      modalImage.src = imageSrc;
+      modal.style.display = 'flex';
+    }
+
+    // Navigate to the next question
+    function nextQuestion() {
+      if (currentIndex < pairs.length - 1) {
+        currentIndex++;
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    // Navigate to the previous question
+    function previousQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadQuestion();
+      }
+    }
+
+    // Show game results
+    function showResults() {
+      gameCompleted = true;
+      document.getElementById('game-container').style.display = 'none';
+      document.getElementById('results-container').style.display = 'block';
+      document.getElementById('final-score').textContent = score;
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize the game
+      initGame();
+
+      // Toggle leaf names
+      document.getElementById('toggle-names').addEventListener('click', () => {
+        showNames = !showNames;
+        document.getElementById('leaf-name').style.opacity = showNames ? 1 : 0;
+        document.getElementById('toggle-names').textContent = showNames ? 'Hide Leaf Names' : 'Show Leaf Names';
+      });
+
+      // Navigation buttons
+      document.getElementById('next-button').addEventListener('click', nextQuestion);
+      document.getElementById('back-button').addEventListener('click', previousQuestion);
+
+      // Restart button
+      document.getElementById('restart-button').addEventListener('click', initGame);
+
+      // Close modal
+      document.getElementById('close-modal').addEventListener('click', () => {
+        document.getElementById('zoom-modal').style.display = 'none';
+      });
+
+      // Close modal when clicking outside
+      window.addEventListener('click', (e) => {
+        const modal = document.getElementById('zoom-modal');
+        if (e.target === modal) {
+          modal.style.display = 'none';
         }
-        
-        // Handle option selection
-        function selectOption(optionElement, selectedFern, correctFern) {
-            // If already answered, do nothing
-            if (answeredQuestions[currentQuestionIndex]) {
-                return;
-            }
-            
-            const isCorrect = selectedFern === correctFern;
-            
-            // Mark the option as correct/incorrect
-            optionElement.classList.add(isCorrect ? 'correct' : 'incorrect');
-            
-            // Find and mark the correct option if the selected one was incorrect
-            if (!isCorrect) {
-                const options = optionsContainer.querySelectorAll('.option');
-                options.forEach(option => {
-                    if (option.textContent === correctFern) {
-                        option.classList.add('correct');
-                    }
-                });
-            }
-            
-            // Update score if correct
-            if (isCorrect) {
-                score++;
-                scoreElement.textContent = score;
-            }
-            
-            // Show feedback
-            showFeedback(isCorrect);
-            
-            // Save the answer
-            answeredQuestions[currentQuestionIndex] = {
-                selectedFern,
-                isCorrect
-            };
-            
-            // Enable next button
-            nextButton.disabled = false;
-            
-            // Check if game is over
-            if (Object.keys(answeredQuestions).length === shuffledPlants.length) {
-                setTimeout(() => {
-                    finalScoreElement.textContent = score;
-                    questionSection.style.display = 'none';
-                    gameOverSection.style.display = 'block';
-                }, 1500);
-            }
-        }
-        
-        // Show feedback message
-        function showFeedback(isCorrect) {
-            feedbackElement.textContent = isCorrect ? 'Correct! 🎉' : 'Incorrect! Try again on the next one.';
-            feedbackElement.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
-            feedbackElement.style.display = 'block';
-        }
-        
-        // Hide feedback message
-        function hideFeedback() {
-            feedbackElement.style.display = 'none';
-        }
-        
-        // Show previous answer for a revisited question
-        function showPreviousAnswer() {
-            const answer = answeredQuestions[currentQuestionIndex];
-            const correctFern = shuffledPlants[currentQuestionIndex].fern;
-            const options = optionsContainer.querySelectorAll('.option');
-            
-            options.forEach(option => {
-                if (option.textContent === correctFern) {
-                    option.classList.add('correct');
-                } else if (option.textContent === answer.selectedFern && !answer.isCorrect) {
-                    option.classList.add('incorrect');
-                }
-            });
-            
-            // Show feedback
-            showFeedback(answer.isCorrect);
-        }
-        
-        // Navigate to previous question
-        function goToPrevQuestion() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                loadQuestion();
-            }
-        }
-        
-        // Navigate to next question
-        function goToNextQuestion() {
-            if (currentQuestionIndex < shuffledPlants.length - 1) {
-                currentQuestionIndex++;
-                loadQuestion();
-            }
-        }
-        
-        // Fisher-Yates shuffle algorithm
-        function shuffleArray(array) {
-            const newArray = [...array];
-            for (let i = newArray.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-            }
-            return newArray;
-        }
-        
-        // Event listeners
-        prevButton.addEventListener('click', goToPrevQuestion);
-        nextButton.addEventListener('click', goToNextQuestion);
-        restartButton.addEventListener('click', initGame);
-        
-        // Start the game
-        document.addEventListener('DOMContentLoaded', initGame);
-    </script>
+      });
+    });
+  </script>
 </body>
+
 </html>
