@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plants R Cool</title>
+  <title>Leaf-Fern Matching Game</title>
   <style>
     :root {
       --primary-color: #2c3e50;
@@ -14,6 +14,7 @@
       --text-color: #333333;
       --success-color: #2ecc71;
       --error-color: #e74c3c;
+      --warning-color: #f39c12;
     }
 
     * {
@@ -74,32 +75,11 @@
     }
 
     .toggle-mode.hard-mode {
-      background-color: #f39c12;
+      background-color: var(--warning-color);
     }
 
     .toggle-mode:hover {
       filter: brightness(1.1);
-    }
-
-    .name-input-container {
-      margin-top: 15px;
-      display: none;
-    }
-
-    .name-input {
-      padding: 10px;
-      border: 2px solid var(--primary-color);
-      border-radius: 5px;
-      font-size: 16px;
-      width: 100%;
-      max-width: 300px;
-      margin: 0 auto;
-    }
-
-    .name-feedback {
-      margin-top: 10px;
-      font-weight: bold;
-      height: 20px;
     }
 
     .game-container {
@@ -121,7 +101,6 @@
       font-size: 22px;
       font-weight: bold;
       margin-bottom: 15px;
-      transition: opacity 0.3s;
     }
 
     .leaf-image {
@@ -129,6 +108,43 @@
       max-height: 250px;
       object-fit: contain;
       margin-bottom: 10px;
+    }
+
+    .name-input-container {
+      margin-top: 15px;
+      display: none;
+    }
+
+    .input-row {
+      display: flex;
+      max-width: 300px;
+      margin: 0 auto;
+      gap: 10px;
+    }
+
+    .name-input {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid var(--primary-color);
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .ok-button {
+      white-space: nowrap;
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .name-feedback {
+      margin-top: 10px;
+      font-weight: bold;
+      height: 20px;
     }
 
     .ferns-container {
@@ -228,7 +244,7 @@
     }
 
     .feedback.partial {
-      color: #f39c12;
+      color: var(--warning-color);
     }
 
     .modal {
@@ -303,6 +319,7 @@
       font-size: 18px;
       cursor: pointer;
       transition: background-color 0.3s;
+      margin-bottom: 20px;
     }
 
     .restart-button:hover {
@@ -368,7 +385,7 @@
     }
 
     .history-mode.hard {
-      background-color: #f39c12;
+      background-color: var(--warning-color);
     }
 
     .clear-history {
@@ -392,7 +409,7 @@
 
 <body>
   <div class="header">
-    <h1 class="title">Plants R Cool</h1>
+    <h1 class="title">Leaf-Fern Matching Game</h1>
   </div>
 
   <div class="score-container">
@@ -407,9 +424,9 @@
       <h2 id="leaf-name" class="leaf-name">Name of Leaf</h2>
       <img id="leaf-image" class="leaf-image" src="" alt="Leaf image">
       <div id="name-input-container" class="name-input-container">
-        <div style="display: flex; max-width: 300px; margin: 0 auto; gap: 10px;">
+        <div class="input-row">
           <input type="text" id="name-input" class="name-input" placeholder="Type leaf name...">
-          <button id="check-name-button" class="toggle-mode" style="white-space: nowrap;">OK</button>
+          <button id="check-name-button" class="ok-button">OK</button>
         </div>
         <div id="name-feedback" class="name-feedback"></div>
       </div>
@@ -454,475 +471,467 @@
   </div>
 
   <script>
-    // Game state
-    let pairs = [];
-    let currentIndex = 0;
-    let score = 0;
-    let hardMode = false;
-    let hasAnswered = false;
-    let gameCompleted = false;
-    let fernScored = false;
-    let nameScored = false;
-    let scoreHistory = [];
-
-    // Define all tree types from the image (15 total)
-    const allTreeTypes = [
-      'kiefer',   // Pine
-      'tanne',    // Fir
-      'laerche',  // Larch
-      'fichte',   // Spruce
-      'wacholder', // Juniper
-      'eiche',    // Oak
-      'rotbuche', // Beech
-      'hainbuche', // Hornbeam
-      'birke',    // Birch
-      'kastanie', // Chestnut
-      'linde',    // Linden/Lime tree
-      'eberesche', // Rowan/Mountain ash
-      'esche',    // Ash
-      'ahorn',    // Maple
-      'platane'   // Plane tree
-    ];
-
-    // Initialize the game
-    function initGame() {
-      // Create pairs based on all tree types
-      pairs = [];
-      allTreeTypes.forEach(tree => {
-        pairs.push({
-          leaf: `${tree}_leaf`,
-          fern: `${tree}_fern`,
-          name: tree
-        });
-      });
-
-      // Randomize the order of pairs
-      shuffleArray(pairs);
-
-      // Update total questions display
-      document.getElementById('total-questions').textContent = pairs.length;
-      document.getElementById('max-score').textContent = pairs.length;
-
-      // Reset game state
-      currentIndex = 0;
-      score = 0;
-      document.getElementById('current-score').textContent = score;
-      hasAnswered = false;
-      fernScored = false;
-      nameScored = false;
-      gameCompleted = false;
-      fernScored = false;
-      nameScored = false;
-
-      // Show game container and hide results
-      document.getElementById('game-container').style.display = 'flex';
-      document.getElementById('results-container').style.display = 'none';
-
-      // Load the first question
-      loadQuestion();
-    }
-
-    // Fisher-Yates shuffle algorithm
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-    }
-
-    // Load score history from localStorage
-    function loadScoreHistory() {
-      const savedHistory = localStorage.getItem('leafFernScoreHistory');
-      if (savedHistory) {
-        scoreHistory = JSON.parse(savedHistory);
-      }
-      updateScoreHistoryDisplay();
-    }
-
-    // Save score history to localStorage
-    function saveScoreHistory() {
-      localStorage.setItem('leafFernScoreHistory', JSON.stringify(scoreHistory));
-      updateScoreHistoryDisplay();
-    }
-
-    // Update the score history display
-    function updateScoreHistoryDisplay() {
-      const historyList = document.getElementById('score-history-list');
-
-      if (scoreHistory.length === 0) {
-        historyList.innerHTML = '<div class="no-history">No previous scores yet</div>';
-        return;
-      }
-
-      // Sort by date (newest first)
-      const sortedHistory = [...scoreHistory].sort((a, b) => b.date - a.date);
-
-      historyList.innerHTML = '';
-
-      sortedHistory.forEach(entry => {
-        const historyItem = document.createElement('div');
-        historyItem.className = 'score-history-item';
-
-        const scorePercent = Math.round((entry.score / entry.total) * 100);
-        const isHighScore = scorePercent >= 80;
-
-        const date = new Date(entry.date);
-        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-
-        historyItem.innerHTML = `
-                    <div>
-                        <span class="history-score ${isHighScore ? 'high' : ''}">${entry.score}/${entry.total} (${scorePercent}%)</span>
-                        <span class="history-mode ${entry.hardMode ? 'hard' : ''}">${entry.hardMode ? 'Hard' : 'Normal'}</span>
-                    </div>
-                    <div class="history-date">${formattedDate}</div>
-                `;
-
-        historyList.appendChild(historyItem);
-      });
-    }
-
-    // Clear score history
-    function clearScoreHistory() {
-      if (confirm('Are you sure you want to clear all score history?')) {
-        scoreHistory = [];
-        saveScoreHistory();
-      }
-    }
-
-    // Format the display name from the file name
-    function formatDisplayName(filename) {
-      if (typeof filename === 'string') {
-        const parts = filename.split('_');
-        return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-      }
-      return filename.charAt(0).toUpperCase() + filename.slice(1);
-    }
-
-    // Toggle hard mode
-    function toggleHardMode() {
-      hardMode = !hardMode;
-      const toggleButton = document.getElementById('toggle-mode');
-      const nameInputContainer = document.getElementById('name-input-container');
-      const leafName = document.getElementById('leaf-name');
-
-      if (hardMode) {
-        toggleButton.textContent = 'Easy Mode';
-        toggleButton.classList.add('hard-mode');
-        nameInputContainer.style.display = 'block';
-        leafName.style.display = 'none';
-      } else {
-        toggleButton.textContent = 'Hard Mode';
-        toggleButton.classList.remove('hard-mode');
-        nameInputContainer.style.display = 'none';
-        leafName.style.display = 'block';
-      }
-
-      // Reset current question
-      hasAnswered = false;
-      fernScored = false;
-      nameScored = false;
-      document.getElementById('feedback').textContent = '';
-      document.getElementById('feedback').className = 'feedback';
-      document.getElementById('name-feedback').textContent = '';
-      document.getElementById('name-input').value = '';
-
-      const fernOptions = document.querySelectorAll('.fern-option');
-      fernOptions.forEach(option => {
-        option.classList.remove('correct', 'incorrect');
-      });
-
-      document.getElementById('next-button').disabled = true;
-    }
-
-    // Load a question
-    function loadQuestion() {
-      if (currentIndex >= pairs.length) {
-        showResults();
-        return;
-      }
-
-      const currentPair = pairs[currentIndex];
-
-      // Set leaf image and name
-      const leafImage = document.getElementById('leaf-image');
-      leafImage.src = `images/${currentPair.leaf}.png`;
-      leafImage.alt = formatDisplayName(currentPair.leaf);
-
-      document.getElementById('leaf-name').textContent = formatDisplayName(currentPair.name);
-      document.getElementById('name-input').value = '';
-      document.getElementById('name-feedback').textContent = '';
-
-      // Clear previous fern options
-      const fernsContainer = document.getElementById('ferns-container');
-      fernsContainer.innerHTML = '';
-
-      // Create array of fern options (correct one + 3 random incorrect ones)
-      const correctFern = currentPair.fern;
-      let fernOptions = [correctFern];
-
-      // Add incorrect options
-      while (fernOptions.length < 4) {
-        const randomIndex = Math.floor(Math.random() * pairs.length);
-        const randomFern = pairs[randomIndex].fern;
-
-        // Make sure we don't add duplicates
-        if (randomFern !== correctFern && !fernOptions.includes(randomFern)) {
-          fernOptions.push(randomFern);
-        }
-      }
-
-      // Shuffle the options
-      shuffleArray(fernOptions);
-
-      // Create the fern option elements
-      fernOptions.forEach((fern, index) => {
-        const fernOption = document.createElement('div');
-        fernOption.className = 'fern-option';
-        fernOption.dataset.fern = fern;
-
-        const fernImage = document.createElement('img');
-        fernImage.src = `images/${fern}.png`;
-        fernImage.alt = formatDisplayName(fern);
-        fernImage.className = 'fern-image';
-
-        const zoomIcon = document.createElement('div');
-        zoomIcon.className = 'zoom-icon';
-        zoomIcon.innerHTML = '🔍';
-        zoomIcon.addEventListener('click', (e) => {
-          e.stopPropagation();
-          showZoomedImage(`images/${fern}.png`);
-        });
-
-        fernOption.appendChild(fernImage);
-        fernOption.appendChild(zoomIcon);
-
-        fernOption.addEventListener('click', () => {
-          if (!fernScored) {
-            checkFernAnswer(fern);
-          }
-        });
-
-        fernsContainer.appendChild(fernOption);
-      });
-
-      // Reset feedback and button states
-      document.getElementById('feedback').textContent = '';
-      document.getElementById('feedback').className = 'feedback';
-
-      document.getElementById('back-button').disabled = currentIndex === 0;
-      document.getElementById('next-button').disabled = true;
-
-      hasAnswered = false;
-    }
-
-    // Check the selected fern answer
-    function checkFernAnswer(selectedFern) {
-      const correctFern = pairs[currentIndex].fern;
-      const isCorrect = selectedFern === correctFern;
-
-      if (isCorrect) {
-        // In hard mode, this is worth 0.5 points
-        if (hardMode) {
-          score += 0.5;
-          document.getElementById('current-score').textContent = score;
-          document.getElementById('feedback').textContent = 'Fern: Correct! (+0.5)';
-          document.getElementById('feedback').className = 'feedback partial';
-        } else {
-          score += 1;
-          document.getElementById('current-score').textContent = score;
-          document.getElementById('feedback').textContent = 'Correct!';
-          document.getElementById('feedback').className = 'feedback correct';
-        }
-      } else {
-        document.getElementById('feedback').textContent = hardMode ? 'Fern: Incorrect!' : 'Incorrect!';
-        document.getElementById('feedback').className = 'feedback incorrect';
-      }
-
-      // Highlight the correct and incorrect options
-      const fernOptions = document.querySelectorAll('.fern-option');
-      fernOptions.forEach(option => {
-        if (option.dataset.fern === correctFern) {
-          option.classList.add('correct');
-        } else if (option.dataset.fern === selectedFern && !isCorrect) {
-          option.classList.add('incorrect');
-        }
-      });
-
-      fernScored = true;
-      checkIfQuestionCompleted();
-    }
-
-    // Check the leaf name input
-    function checkNameInput() {
-      if (nameScored || !hardMode) return;
-
-      const correctName = pairs[currentIndex].name.toLowerCase();
-      const userInput = document.getElementById('name-input').value.trim().toLowerCase();
-
-      let isCorrect = false;
-
-      // Check for exact match or close match (allowing some flexibility)
-      if (userInput === correctName) {
-        isCorrect = true;
-      } else {
-        // Check for at least 70% similarity
-        const similarity = calculateStringSimilarity(userInput, correctName);
-        isCorrect = similarity >= 0.7;
-      }
-
-      const nameFeedback = document.getElementById('name-feedback');
-
-      if (isCorrect) {
-        score += 0.5;
-        document.getElementById('current-score').textContent = score;
-        nameFeedback.textContent = 'Name: Correct! (+0.5)';
-        nameFeedback.style.color = 'var(--success-color)';
-      } else {
-        nameFeedback.textContent = `Name: Incorrect! (${formatDisplayName(correctName)})`;
-        nameFeedback.style.color = 'var(--error-color)';
-      }
-
-      nameScored = true;
-      checkIfQuestionCompleted();
-    }
-
-    // Simple string similarity calculation (Levenshtein distance based)
-    function calculateStringSimilarity(a, b) {
-      if (a.length === 0) return b.length === 0 ? 1 : 0;
-      if (b.length === 0) return 0;
-
-      const matrix = [];
-
-      // Initialize matrix
-      for (let i = 0; i <= b.length; i++) {
-        matrix[i] = [i];
-      }
-
-      for (let j = 0; j <= a.length; j++) {
-        matrix[0][j] = j;
-      }
-
-      // Fill matrix
-      for (let i = 1; i <= b.length; i++) {
-        for (let j = 1; j <= a.length; j++) {
-          const cost = a[j - 1] === b[i - 1] ? 0 : 1;
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j] + 1,      // deletion
-            matrix[i][j - 1] + 1,      // insertion
-            matrix[i - 1][j - 1] + cost // substitution
-          );
-        }
-      }
-
-      const distance = matrix[b.length][a.length];
-      const maxLength = Math.max(a.length, b.length);
-
-      return maxLength === 0 ? 1 : (1 - distance / maxLength);
-    }
-
-    // Check if the current question is completed
-    function checkIfQuestionCompleted() {
-      if (hardMode) {
-        hasAnswered = fernScored && nameScored;
-      } else {
-        hasAnswered = fernScored;
-      }
-
-      document.getElementById('next-button').disabled = !hasAnswered;
-    }
-
-    // Show the zoomed image modal
-    function showZoomedImage(imageSrc) {
-      const modal = document.getElementById('zoom-modal');
-      const modalImage = document.getElementById('modal-image');
-
-      modalImage.src = imageSrc;
-      modal.style.display = 'flex';
-    }
-
-    // Navigate to the next question
-    function nextQuestion() {
-      if (currentIndex < pairs.length - 1) {
-        currentIndex++;
-        loadQuestion();
-      } else {
-        showResults();
-      }
-    }
-
-    // Navigate to the previous question
-    function previousQuestion() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        loadQuestion();
-      }
-    }
-
-    // Show game results
-    function showResults() {
-      gameCompleted = true;
-
-      // Add score to history
-      const scoreEntry = {
-        score: score,
-        total: pairs.length,
-        date: Date.now(),
-        hardMode: hardMode
+    document.addEventListener('DOMContentLoaded', function () {
+      // All tree types
+      const treeTypes = [
+        'kiefer',   // Pine
+        'tanne',    // Fir
+        'laerche',  // Larch
+        'fichte',   // Spruce
+        'wacholder', // Juniper
+        'eiche',    // Oak
+        'rotbuche', // Beech
+        'hainbuche', // Hornbeam
+        'birke',    // Birch
+        'kastanie', // Chestnut
+        'linde',    // Linden/Lime tree
+        'eberesche', // Rowan/Mountain ash
+        'esche',    // Ash
+        'ahorn',    // Maple
+        'platane'   // Plane tree
+      ];
+
+      // Game state
+      let pairs = [];
+      let currentIndex = 0;
+      let score = 0;
+      let hardMode = false;
+      let fernScored = false;
+      let nameScored = false;
+      let scoreHistory = [];
+
+      // DOM Elements
+      const elements = {
+        currentScore: document.getElementById('current-score'),
+        totalQuestions: document.getElementById('total-questions'),
+        maxScore: document.getElementById('max-score'),
+        toggleMode: document.getElementById('toggle-mode'),
+        leafName: document.getElementById('leaf-name'),
+        leafImage: document.getElementById('leaf-image'),
+        nameInputContainer: document.getElementById('name-input-container'),
+        nameInput: document.getElementById('name-input'),
+        nameFeedback: document.getElementById('name-feedback'),
+        checkNameButton: document.getElementById('check-name-button'),
+        fernsContainer: document.getElementById('ferns-container'),
+        feedback: document.getElementById('feedback'),
+        backButton: document.getElementById('back-button'),
+        nextButton: document.getElementById('next-button'),
+        gameContainer: document.getElementById('game-container'),
+        resultsContainer: document.getElementById('results-container'),
+        finalScore: document.getElementById('final-score'),
+        restartButton: document.getElementById('restart-button'),
+        scoreHistoryList: document.getElementById('score-history-list'),
+        clearHistory: document.getElementById('clear-history'),
+        zoomModal: document.getElementById('zoom-modal'),
+        modalImage: document.getElementById('modal-image'),
+        closeModal: document.getElementById('close-modal')
       };
-
-      scoreHistory.push(scoreEntry);
-      saveScoreHistory();
-
-      document.getElementById('game-container').style.display = 'none';
-      document.getElementById('results-container').style.display = 'block';
-      document.getElementById('final-score').textContent = score;
-    }
-
-    // Event listeners
-    document.addEventListener('DOMContentLoaded', () => {
-      // Load score history
-      loadScoreHistory();
 
       // Initialize the game
       initGame();
+      loadScoreHistory();
+
+      // Format display name
+      function formatDisplayName(name) {
+        if (name.includes('_')) {
+          const parts = name.split('_');
+          return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+        }
+        return name.charAt(0).toUpperCase() + name.slice(1);
+      }
+
+      // Fisher-Yates shuffle algorithm
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      // Initialize the game
+      function initGame() {
+        // Create pairs based on tree types
+        pairs = [];
+        treeTypes.forEach(tree => {
+          pairs.push({
+            leaf: `${tree}_leaf`,
+            fern: `${tree}_fern`,
+            name: tree
+          });
+        });
+
+        // Randomize the order of pairs
+        shuffleArray(pairs);
+
+        // Reset game state
+        currentIndex = 0;
+        score = 0;
+        fernScored = false;
+        nameScored = false;
+
+        // Update UI
+        elements.currentScore.textContent = '0';
+        elements.totalQuestions.textContent = pairs.length;
+        elements.maxScore.textContent = pairs.length;
+
+        // Reset hard mode if active
+        if (hardMode) {
+          hardMode = false;
+          elements.toggleMode.textContent = 'Hard Mode';
+          elements.toggleMode.classList.remove('hard-mode');
+          elements.nameInputContainer.style.display = 'none';
+          elements.leafName.style.display = 'block';
+        }
+
+        // Show game container
+        elements.gameContainer.style.display = 'flex';
+        elements.resultsContainer.style.display = 'none';
+
+        // Load the first question
+        loadQuestion();
+      }
+
+      // Load a question
+      function loadQuestion() {
+        if (currentIndex >= pairs.length) {
+          showResults();
+          return;
+        }
+
+        const currentPair = pairs[currentIndex];
+
+        // Set leaf image and name
+        elements.leafImage.src = `images/${currentPair.leaf}.png`;
+        elements.leafImage.alt = formatDisplayName(currentPair.name);
+        elements.leafName.textContent = formatDisplayName(currentPair.name);
+
+        // Reset input and feedback
+        elements.nameInput.value = '';
+        elements.nameFeedback.textContent = '';
+        elements.nameFeedback.style.color = '';
+
+        // Reset question state
+        fernScored = false;
+        nameScored = false;
+        elements.feedback.textContent = '';
+        elements.feedback.className = 'feedback';
+        elements.nextButton.disabled = true;
+
+        // Clear previous fern options
+        elements.fernsContainer.innerHTML = '';
+
+        // Get correct fern and three random different ferns
+        const correctFern = currentPair.fern;
+        const fernOptions = [correctFern];
+
+        while (fernOptions.length < 4) {
+          const randomIndex = Math.floor(Math.random() * pairs.length);
+          const randomFern = pairs[randomIndex].fern;
+
+          if (randomFern !== correctFern && !fernOptions.includes(randomFern)) {
+            fernOptions.push(randomFern);
+          }
+        }
+
+        // Shuffle options
+        shuffleArray(fernOptions);
+
+        // Create fern option elements
+        fernOptions.forEach(fern => {
+          const fernOption = document.createElement('div');
+          fernOption.className = 'fern-option';
+          fernOption.dataset.fern = fern;
+
+          const fernImage = document.createElement('img');
+          fernImage.src = `images/${fern}.png`;
+          fernImage.alt = formatDisplayName(fern);
+          fernImage.className = 'fern-image';
+
+          const zoomIcon = document.createElement('div');
+          zoomIcon.className = 'zoom-icon';
+          zoomIcon.innerHTML = '🔍';
+          zoomIcon.addEventListener('click', function (e) {
+            e.stopPropagation();
+            showZoomedImage(`images/${fern}.png`);
+          });
+
+          fernOption.appendChild(fernImage);
+          fernOption.appendChild(zoomIcon);
+
+          fernOption.addEventListener('click', function () {
+            if (!fernScored) {
+              checkFernAnswer(fern);
+            }
+          });
+
+          elements.fernsContainer.appendChild(fernOption);
+        });
+
+        // Update navigation buttons
+        elements.backButton.disabled = currentIndex === 0;
+      }
+
+      // Check fern answer
+      function checkFernAnswer(selectedFern) {
+        const correctFern = pairs[currentIndex].fern;
+        const isCorrect = selectedFern === correctFern;
+
+        if (isCorrect) {
+          if (hardMode) {
+            score += 0.5;
+            elements.currentScore.textContent = score;
+            elements.feedback.textContent = 'Fern: Correct! (+0.5)';
+            elements.feedback.className = 'feedback partial';
+          } else {
+            score += 1;
+            elements.currentScore.textContent = score;
+            elements.feedback.textContent = 'Correct!';
+            elements.feedback.className = 'feedback correct';
+          }
+        } else {
+          elements.feedback.textContent = hardMode ? 'Fern: Incorrect!' : 'Incorrect!';
+          elements.feedback.className = 'feedback incorrect';
+        }
+
+        // Highlight correct and incorrect options
+        document.querySelectorAll('.fern-option').forEach(option => {
+          if (option.dataset.fern === correctFern) {
+            option.classList.add('correct');
+          } else if (option.dataset.fern === selectedFern && !isCorrect) {
+            option.classList.add('incorrect');
+          }
+        });
+
+        fernScored = true;
+        checkIfQuestionCompleted();
+      }
+
+      // Check name input
+      function checkNameInput() {
+        if (nameScored || !hardMode) return;
+
+        const correctName = pairs[currentIndex].name.toLowerCase();
+        const userInput = elements.nameInput.value.trim().toLowerCase();
+
+        let isCorrect = false;
+
+        if (userInput === correctName) {
+          isCorrect = true;
+        } else {
+          const similarity = calculateStringSimilarity(userInput, correctName);
+          isCorrect = similarity >= 0.7;
+        }
+
+        if (isCorrect) {
+          score += 0.5;
+          elements.currentScore.textContent = score;
+          elements.nameFeedback.textContent = 'Name: Correct! (+0.5)';
+          elements.nameFeedback.style.color = 'var(--success-color)';
+        } else {
+          elements.nameFeedback.textContent = `Name: Incorrect! (${formatDisplayName(correctName)})`;
+          elements.nameFeedback.style.color = 'var(--error-color)';
+        }
+
+        nameScored = true;
+        checkIfQuestionCompleted();
+      }
+
+      // Calculate string similarity
+      function calculateStringSimilarity(a, b) {
+        if (a.length === 0) return b.length === 0 ? 1 : 0;
+        if (b.length === 0) return 0;
+
+        const matrix = [];
+
+        // Initialize matrix
+        for (let i = 0; i <= b.length; i++) {
+          matrix[i] = [i];
+        }
+
+        for (let j = 0; j <= a.length; j++) {
+          matrix[0][j] = j;
+        }
+
+        // Fill matrix
+        for (let i = 1; i <= b.length; i++) {
+          for (let j = 1; j <= a.length; j++) {
+            const cost = a[j - 1] === b[i - 1] ? 0 : 1;
+            matrix[i][j] = Math.min(
+              matrix[i - 1][j] + 1,
+              matrix[i][j - 1] + 1,
+              matrix[i - 1][j - 1] + cost
+            );
+          }
+        }
+
+        const distance = matrix[b.length][a.length];
+        const maxLength = Math.max(a.length, b.length);
+
+        return maxLength === 0 ? 1 : (1 - distance / maxLength);
+      }
+
+      // Check if question is completed
+      function checkIfQuestionCompleted() {
+        const isCompleted = hardMode ? (fernScored && nameScored) : fernScored;
+        elements.nextButton.disabled = !isCompleted;
+      }
+
+      // Show zoomed image
+      function showZoomedImage(imageSrc) {
+        elements.modalImage.src = imageSrc;
+        elements.zoomModal.style.display = 'flex';
+      }
+
+      // Navigate to next question
+      function nextQuestion() {
+        if (currentIndex < pairs.length - 1) {
+          currentIndex++;
+          loadQuestion();
+        } else {
+          showResults();
+        }
+      }
+
+      // Navigate to previous question
+      function previousQuestion() {
+        if (currentIndex > 0) {
+          currentIndex--;
+          loadQuestion();
+        }
+      }
 
       // Toggle hard mode
-      document.getElementById('toggle-mode').addEventListener('click', toggleHardMode);
+      function toggleHardMode() {
+        hardMode = !hardMode;
 
-      // Name input events
-      document.getElementById('name-input').addEventListener('keypress', (e) => {
+        if (hardMode) {
+          elements.toggleMode.textContent = 'Easy Mode';
+          elements.toggleMode.classList.add('hard-mode');
+          elements.nameInputContainer.style.display = 'block';
+          elements.leafName.style.display = 'none';
+        } else {
+          elements.toggleMode.textContent = 'Hard Mode';
+          elements.toggleMode.classList.remove('hard-mode');
+          elements.nameInputContainer.style.display = 'none';
+          elements.leafName.style.display = 'block';
+        }
+
+        // Reset question state
+        fernScored = false;
+        nameScored = false;
+        elements.feedback.textContent = '';
+        elements.feedback.className = 'feedback';
+        elements.nameFeedback.textContent = '';
+        elements.nameInput.value = '';
+        elements.nextButton.disabled = true;
+
+        // Clear highlighting
+        document.querySelectorAll('.fern-option').forEach(option => {
+          option.classList.remove('correct', 'incorrect');
+        });
+      }
+
+      // Show results
+      function showResults() {
+        // Add to score history
+        const scoreEntry = {
+          score: score,
+          total: pairs.length,
+          date: Date.now(),
+          hardMode: hardMode
+        };
+
+        scoreHistory.push(scoreEntry);
+        saveScoreHistory();
+
+        // Update UI
+        elements.finalScore.textContent = score;
+        elements.gameContainer.style.display = 'none';
+        elements.resultsContainer.style.display = 'block';
+      }
+
+      // Score history functions
+      function loadScoreHistory() {
+        const savedHistory = localStorage.getItem('leafFernScoreHistory');
+        if (savedHistory) {
+          scoreHistory = JSON.parse(savedHistory);
+        }
+        updateScoreHistoryDisplay();
+      }
+
+      function saveScoreHistory() {
+        localStorage.setItem('leafFernScoreHistory', JSON.stringify(scoreHistory));
+        updateScoreHistoryDisplay();
+      }
+
+      function updateScoreHistoryDisplay() {
+        if (scoreHistory.length === 0) {
+          elements.scoreHistoryList.innerHTML = '<div class="no-history">No previous scores yet</div>';
+          return;
+        }
+
+        // Sort by date (newest first)
+        const sortedHistory = [...scoreHistory].sort((a, b) => b.date - a.date);
+
+        elements.scoreHistoryList.innerHTML = '';
+
+        sortedHistory.forEach(entry => {
+          const historyItem = document.createElement('div');
+          historyItem.className = 'score-history-item';
+
+          const scorePercent = Math.round((entry.score / entry.total) * 100);
+          const isHighScore = scorePercent >= 80;
+
+          const date = new Date(entry.date);
+          const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+
+          historyItem.innerHTML = `
+                        <div>
+                            <span class="history-score ${isHighScore ? 'high' : ''}">${entry.score}/${entry.total} (${scorePercent}%)</span>
+                            <span class="history-mode ${entry.hardMode ? 'hard' : ''}">${entry.hardMode ? 'Hard' : 'Normal'}</span>
+                        </div>
+                        <div class="history-date">${formattedDate}</div>
+                    `;
+
+          elements.scoreHistoryList.appendChild(historyItem);
+        });
+      }
+
+      function clearScoreHistory() {
+        if (confirm('Are you sure you want to clear all score history?')) {
+          scoreHistory = [];
+          saveScoreHistory();
+        }
+      }
+
+      // Event listeners
+      elements.toggleMode.addEventListener('click', toggleHardMode);
+
+      elements.nameInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter' && !nameScored) {
           checkNameInput();
         }
       });
 
-      // Add OK button for name input
-      document.getElementById('check-name-button').addEventListener('click', () => {
+      elements.checkNameButton.addEventListener('click', function () {
         if (!nameScored) {
           checkNameInput();
         }
       });
 
-      // Navigation buttons
-      document.getElementById('next-button').addEventListener('click', nextQuestion);
-      document.getElementById('back-button').addEventListener('click', previousQuestion);
+      elements.nextButton.addEventListener('click', nextQuestion);
+      elements.backButton.addEventListener('click', previousQuestion);
+      elements.restartButton.addEventListener('click', initGame);
+      elements.clearHistory.addEventListener('click', clearScoreHistory);
 
-      // Restart button
-      document.getElementById('restart-button').addEventListener('click', initGame);
-
-      // Clear history button
-      document.getElementById('clear-history').addEventListener('click', clearScoreHistory);
-
-      // Close modal
-      document.getElementById('close-modal').addEventListener('click', () => {
-        document.getElementById('zoom-modal').style.display = 'none';
+      elements.closeModal.addEventListener('click', function () {
+        elements.zoomModal.style.display = 'none';
       });
 
-      // Close modal when clicking outside
-      window.addEventListener('click', (e) => {
-        const modal = document.getElementById('zoom-modal');
-        if (e.target === modal) {
-          modal.style.display = 'none';
+      window.addEventListener('click', function (e) {
+        if (e.target === elements.zoomModal) {
+          elements.zoomModal.style.display = 'none';
         }
       });
     });
