@@ -3,585 +3,483 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tree Identification Game</title>
+    <title>Leaf and Fern Matching Quiz</title>
     <style>
-        :root {
-            --primary-color: #2c6e49;
-            --secondary-color: #4c956c;
-            --light-color: #fefee3;
-            --accent-color: #d68c45;
-            --correct-color: #4CAF50;
-            --incorrect-color: #f44336;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
         body {
-            background-color: var(--light-color);
-            padding: 20px;
-            max-width: 1200px;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
             margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f8f0;
         }
-        
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-        
-        .tab-container {
-            margin-bottom: 20px;
-        }
-        
-        .tab-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .tab-btn {
-            padding: 10px 20px;
-            background-color: #ddd;
-            border: none;
-            border-radius: 5px 5px 0 0;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .tab-btn.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* Standard Game Styles */
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .game-area {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .game-area {
-                flex-direction: column;
-            }
-        }
-        
-        .leaves-container, .ferns-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .quiz-container {
             background-color: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        
-        h2 {
-            color: var(--secondary-color);
-            margin-bottom: 10px;
+        h1 {
+            color: #2a7d2a;
             text-align: center;
         }
-        
-        .item {
-            padding: 10px;
-            background-color: var(--light-color);
+        .score-container {
+            text-align: right;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .question-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .leaf-image {
+            max-width: 300px;
+            max-height: 300px;
+            margin: 0 auto;
+            display: block;
+            border: 3px solid #2a7d2a;
             border-radius: 5px;
-            border: 2px solid var(--secondary-color);
-            cursor: pointer;
-            transition: all 0.3s ease;
+        }
+        .options-container {
             display: flex;
-            align-items: center;
-            min-height: 80px;
-            justify-content: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        
-        .item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .option {
+            flex: 1;
+            min-width: 150px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
         }
-        
-        .item.selected {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
+        .option:hover {
+            transform: scale(1.05);
         }
-        
-        .item.correct {
-            background-color: var(--correct-color);
-            border-color: var(--correct-color);
+        .option.correct {
+            border: 3px solid #4CAF50;
         }
-        
-        .item.incorrect {
-            background-color: var(--incorrect-color);
-            border-color: var(--incorrect-color);
+        .option.incorrect {
+            border: 3px solid #F44336;
         }
-        
-        .item-img {
-            height: 60px;
-            width: 60px;
+        .option img {
+            width: 100%;
+            height: 200px;
             object-fit: contain;
-            margin-right: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
         }
-        
-        .item-name {
-            font-weight: bold;
-        }
-        
         .controls {
             display: flex;
             justify-content: space-between;
             margin-top: 20px;
         }
-        
         button {
-            padding: 10px 20px;
-            background-color: var(--primary-color);
+            background-color: #2a7d2a;
             color: white;
             border: none;
+            padding: 10px 20px;
+            font-size: 16px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
         }
-        
         button:hover {
-            background-color: var(--secondary-color);
+            background-color: #1c591c;
         }
-        
-        .score-container {
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .feedback {
             text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
         }
-        
-        .score {
+        .feedback.correct {
+            background-color: #dff2bf;
+            color: #4F8A10;
+        }
+        .feedback.incorrect {
+            background-color: #ffbaba;
+            color: #D8000C;
+        }
+        .game-over {
+            text-align: center;
+            margin: 20px 0;
             font-size: 24px;
             font-weight: bold;
-            color: var(--primary-color);
+            color: #2a7d2a;
         }
-        
-        .instructions {
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        
-        .instructions p {
-            margin-bottom: 10px;
-        }
-        
-        .game-modes {
-            margin-top: 15px;
-            background-color: rgba(44, 110, 73, 0.1);
-            padding: 10px;
-            border-radius: 5px;
-        }
-        
-        .game-modes h3 {
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-        
-        .game-modes label {
-            display: block;
-            margin-bottom: 5px;
-            cursor: pointer;
-        }
-        
-        .game-modes input[type="radio"] {
-            margin-right: 5px;
-        }
-        
-        /* Quiz Mode Styles */
-        .quiz-container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        
-        .quiz-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .quiz-score {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .quiz-content {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        @media (min-width: 768px) {
-            .quiz-content {
-                flex-direction: row;
-                height: 70vh;
-            }
-        }
-        
-        .quiz-question {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background-color: var(--light-color);
-            border-radius: 10px;
-        }
-        
-        .quiz-leaf-img {
-            max-height: 250px;
-            max-width: 100%;
-            object-fit: contain;
-            margin-bottom: 20px;
-        }
-        
-        .quiz-options {
-            flex: 3;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .quiz-option {
-            background-color: var(--light-color);
-            border: 2px solid var(--secondary-color);
-            border-radius: 10px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .quiz-option:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .quiz-option.selected {
-            border-color: var(--accent-color);
-            background-color: rgba(214, 140, 69, 0.1);
-        }
-        
-        .quiz-option.correct {
-            border-color: var(--correct-color);
-            background-color: rgba(76, 175, 80, 0.1);
-        }
-        
-        .quiz-option.incorrect {
-            border-color: var(--incorrect-color);
-            background-color: rgba(244, 67, 54, 0.1);
-        }
-        
-        .quiz-option-img {
-            height: 80px;
-            object-fit: contain;
-            margin-bottom: 10px;
-            transition: transform 0.3s ease;
-        }
-        
-        .quiz-option-img.enlarged {
-            transform: scale(2.5);
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform-origin: center;
-            z-index: 100;
-            background-color: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .quiz-option-name {
-            font-weight: bold;
+        .loading {
             text-align: center;
-        }
-        
-        .quiz-controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        
-        .quiz-confirm-btn {
-            background-color: var(--accent-color);
-        }
-        
-        .quiz-confirm-btn:hover {
-            background-color: #c17b34;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 500px;
-            text-align: center;
-        }
-        
-        .modal h2 {
-            margin-bottom: 20px;
-        }
-        
-        .modal p {
-            margin-bottom: 30px;
+            margin: 50px;
             font-size: 18px;
         }
-        
-        .overlay {
+        #error-message {
+            background-color: #ffbaba;
+            color: #D8000C;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 90;
-            cursor: pointer;
         }
-        
-        .credits {
-            font-size: 12px;
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
+        /* Progress bar styling */
+        .progress-container {
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .progress {
+            height: 100%;
+            background-color: #2a7d2a;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Tree Identification Game</h1>
-        <p>Test your knowledge of trees by matching leaves to their seeds, fruits, or cones.</p>
-    </header>
-    
-    <div class="tab-container">
-        <div class="tab-buttons">
-            <button class="tab-btn active" data-tab="standard">Standard Matching</button>
-            <button class="tab-btn" data-tab="quiz">Multiple Choice</button>
-        </div>
-    </div>
-    
-    <!-- Standard Matching Game -->
-    <div id="standard" class="tab-content active">
-        <div class="instructions">
-            <h3>How to Play:</h3>
-            <p>1. Click on a leaf from the left column.</p>
-            <p>2. Then click on the matching seed/fruit/cone in the right column.</p>
-            <p>3. If you're correct, both items will turn green. If wrong, they'll turn red briefly.</p>
-            <p>4. Try to match all 15 trees correctly!</p>
-            
-            <div class="game-modes">
-                <h3>Game Modes:</h3>
-                <label><input type="radio" name="gameMode" value="names-both" checked> Show names with both leaf and seed/fruit/cone</label><br>
-                <label><input type="radio" name="gameMode" value="names-leaf"> Show names only with leaves</label><br>
-                <label><input type="radio" name="gameMode" value="no-names"> No names shown (images only)</label>
+    <div class="quiz-container">
+        <h1>Leaf and Fern Matching Quiz</h1>
+        <div id="error-message"></div>
+        
+        <div id="loading" class="loading">
+            <p>Loading images...</p>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress" class="progress"></div>
+                </div>
+                <div id="progress-text">0/0 images found</div>
             </div>
         </div>
         
-        <div class="game-container">
-            <div class="score-container">
-                <p>Correct Matches: <span class="score" id="standard-score">0</span> / 15</p>
-            </div>
+        <div id="quiz-content" style="display: none;">
+            <div class="score-container">Score: <span id="score">0</span>/<span id="total-questions">0</span></div>
             
-            <div class="game-area">
-                <div class="leaves-container">
-                    <h2>Leaves & Needles</h2>
-                    <div id="leaves-list"></div>
+            <div id="question-section">
+                <div class="question-container">
+                    <h2>Match this leaf with its corresponding fern:</h2>
+                    <img id="leaf-image" class="leaf-image" src="" alt="Leaf image">
                 </div>
                 
-                <div class="ferns-container">
-                    <h2>Seeds, Fruits & Cones</h2>
-                    <div id="ferns-list"></div>
+                <div class="options-container" id="options">
+                    <!-- Options will be dynamically loaded here -->
                 </div>
+                
+                <div id="feedback" class="feedback" style="display: none;"></div>
+            </div>
+            
+            <div id="game-over" class="game-over" style="display: none;">
+                Game Over! Your final score: <span id="final-score">0</span>/<span id="final-total">0</span>
             </div>
             
             <div class="controls">
-                <button id="reset-btn">Reset Game</button>
-                <button id="hint-btn">Show Hint</button>
+                <button id="prev-btn" disabled>Previous</button>
+                <button id="next-btn" disabled>Next</button>
+                <button id="restart-btn">Restart Game</button>
             </div>
         </div>
-    </div>
-    
-    <!-- Quiz Mode Game -->
-    <div id="quiz" class="tab-content">
-        <div class="instructions">
-            <h3>How to Play:</h3>
-            <p>1. A leaf image will be displayed at the top.</p>
-            <p>2. Choose from four possible seed/fruit/cone matches below.</p>
-            <p>3. Click on any image to enlarge it for better viewing.</p>
-            <p>4. Confirm your selection with the "Confirm Answer" button.</p>
-            <p>5. Correct answers earn you 1 point. See how many you can get right!</p>
-        </div>
-        
-        <div class="quiz-container">
-            <div class="quiz-header">
-                <div class="quiz-score">Score: <span id="quiz-score">0</span> / 15</div>
-                <div class="quiz-progress">Question: <span id="quiz-progress">1</span> / 15</div>
-            </div>
-            
-            <div class="quiz-content">
-                <div class="quiz-question">
-                    <img id="quiz-leaf-img" class="quiz-leaf-img" src="" alt="Tree leaf/needle">
-                    <h3>Which seed/fruit/cone belongs to this tree?</h3>
-                </div>
-                
-                <div class="quiz-options" id="quiz-options">
-                    <!-- Options will be generated dynamically -->
-                </div>
-            </div>
-            
-            <div class="quiz-controls">
-                <button id="quiz-reset-btn">Start New Game</button>
-                <button id="quiz-confirm-btn" class="quiz-confirm-btn">Confirm Answer</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Overlay for enlarged images -->
-    <div id="overlay" class="overlay"></div>
-    
-    <!-- Final Score Modal -->
-    <div id="score-modal" class="modal">
-        <div class="modal-content">
-            <h2>Quiz Complete!</h2>
-            <p>Your final score: <span id="final-score">0</span> / 15</p>
-            <button id="play-again-btn">Play Again</button>
-        </div>
-    </div>
-    
-    <div class="credits">
-        <p>Based on the tree identification chart featuring 15 common tree species.</p>
     </div>
 
     <script>
-        // Tree data with German and English names
-        const trees = [
-            { id: 'ahorn', german: 'Ahorn', english: 'Maple' },
-            { id: 'birke', german: 'Birke', english: 'Birch' },
-            { id: 'eberesche', german: 'Eberesche', english: 'Rowan/Mountain Ash' },
-            { id: 'eiche', german: 'Eiche', english: 'Oak' },
-            { id: 'esche', german: 'Esche', english: 'Ash' },
-            { id: 'fichte', german: 'Fichte', english: 'Spruce' },
-            { id: 'hainbuche', german: 'Hainbuche', english: 'Hornbeam' },
-            { id: 'kastanie', german: 'Kastanie', english: 'Chestnut' },
-            { id: 'laerche', german: 'Lärche', english: 'Larch' },
-            { id: 'linde', german: 'Linde', english: 'Linden/Lime' },
-            { id: 'platane', german: 'Platane', english: 'Plane tree' },
-            { id: 'rotbuche', german: 'Rotbuche', english: 'Beech' },
-            { id: 'tanne', german: 'Tanne', english: 'Fir' },
-            { id: 'wacholder', german: 'Wacholder', english: 'Juniper' },
-            { id: 'kiefer', german: 'Kiefer', english: 'Pine' }
-        ];
-
-        // Game state - Standard mode
-        let selectedLeaf = null;
-        let selectedFern = null;
-        let correctMatches = [];
-        let score = 0;
-
-        // Game state - Quiz mode
-        let quizQuestions = [];
+        // Game state
+        let plantNames = [];
+        let plants = [];
         let currentQuestionIndex = 0;
-        let selectedOption = null;
-        let quizScore = 0;
-        let answeredCurrent = false;
+        let score = 0;
+        let answeredQuestions = {};
         
-        // DOM elements - Standard mode
-        const leavesList = document.getElementById('leaves-list');
-        const fernsList = document.getElementById('ferns-list');
-        const scoreElement = document.getElementById('standard-score');
-        const resetButton = document.getElementById('reset-btn');
-        const hintButton = document.getElementById('hint-btn');
-        
-        // DOM elements - Quiz mode
-        const quizLeafImg = document.getElementById('quiz-leaf-img');
-        const quizOptions = document.getElementById('quiz-options');
-        const quizScoreElement = document.getElementById('quiz-score');
-        const quizProgressElement = document.getElementById('quiz-progress');
-        const quizConfirmBtn = document.getElementById('quiz-confirm-btn');
-        const quizResetBtn = document.getElementById('quiz-reset-btn');
-        const overlay = document.getElementById('overlay');
-        const scoreModal = document.getElementById('score-modal');
+        // DOM elements
+        const loadingElement = document.getElementById('loading');
+        const quizContent = document.getElementById('quiz-content');
+        const errorMessage = document.getElementById('error-message');
+        const scoreElement = document.getElementById('score');
+        const totalQuestionsElement = document.getElementById('total-questions');
         const finalScoreElement = document.getElementById('final-score');
-        const playAgainBtn = document.getElementById('play-again-btn');
+        const finalTotalElement = document.getElementById('final-total');
+        const leafImage = document.getElementById('leaf-image');
+        const optionsContainer = document.getElementById('options');
+        const feedbackElement = document.getElementById('feedback');
+        const questionSection = document.getElementById('question-section');
+        const gameOverSection = document.getElementById('game-over');
+        const prevButton = document.getElementById('prev-btn');
+        const nextButton = document.getElementById('next-btn');
+        const restartButton = document.getElementById('restart-btn');
+        const progressBar = document.getElementById('progress');
+        const progressText = document.getElementById('progress-text');
         
-        // Tab functionality
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
+        // Initialize the application
+        function initApp() {
+            // Show loading indicator
+            loadingElement.style.display = 'block';
+            quizContent.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Detect plant names from the available image files
+            detectPlantNames()
+                .then(names => {
+                    plantNames = names;
+                    
+                    if (plantNames.length === 0) {
+                        throw new Error("No matching leaf and fern pairs found in the images directory.");
+                    }
+                    
+                    totalQuestionsElement.textContent = plantNames.length;
+                    finalTotalElement.textContent = plantNames.length;
+                    
+                    // Hide loading, show quiz
+                    loadingElement.style.display = 'none';
+                    quizContent.style.display = 'block';
+                    
+                    // Start the game
+                    initGame();
+                })
+                .catch(error => {
+                    // Show error message
+                    loadingElement.style.display = 'none';
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'Error: ' + error.message;
+                    console.error('Error:', error);
+                });
+        }
         
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Remove active class from all buttons and contents
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
+        // Detect available plant names by checking image existence
+        async function detectPlantNames() {
+            // Since we can't list directory contents in the browser,
+            // we'll try to find leaf-fern pairs by checking if images exist
+            
+            // This is the pattern of image names we'll check
+            const possiblePlants = [
+                'acorn', 'maple', 'oak', 'birch', 'pine',
+                'willow', 'ficus', 'palm', 'cedar', 'elm',
+                'spruce', 'redwood', 'ginkgo', 'aspen', 'holly',
+                // Add more potential plant names here
+            ];
+            
+            const validPlants = [];
+            const totalToCheck = possiblePlants.length;
+            let checkedCount = 0;
+            
+            progressBar.style.width = '0%';
+            progressText.textContent = `0/${totalToCheck} images checked`;
+            
+            // Check each possible plant name
+            for (const plant of possiblePlants) {
+                try {
+                    // Check if both leaf and fern images exist
+                    const leafExists = await imageExists(`/images/${plant}_leaf.png`);
+                    const fernExists = await imageExists(`/images/${plant}_fern.png`);
+                    
+                    // If both exist, add to valid plants list
+                    if (leafExists && fernExists) {
+                        validPlants.push(plant);
+                    }
+                    
+                    // Update progress
+                    checkedCount++;
+                    const percentage = (checkedCount / totalToCheck) * 100;
+                    progressBar.style.width = percentage + '%';
+                    progressText.textContent = `${validPlants.length} pairs found (${checkedCount}/${totalToCheck} checked)`;
+                    
+                } catch (error) {
+                    console.error(`Error checking ${plant} images:`, error);
+                }
+            }
+            
+            return validPlants;
+        }
+        
+        // Check if an image exists
+        function imageExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+        
+        // Initialize the game
+        function initGame() {
+            // Reset game state
+            score = 0;
+            currentQuestionIndex = 0;
+            answeredQuestions = {};
+            
+            // Update UI
+            scoreElement.textContent = score;
+            questionSection.style.display = 'block';
+            gameOverSection.style.display = 'none';
+            prevButton.disabled = true;
+            nextButton.disabled = true;
+            
+            // Shuffle plants for a new game
+            plants = shuffleArray([...plantNames]);
+            
+            // Load first question
+            loadQuestion();
+        }
+        
+        // Load question and options
+        function loadQuestion() {
+            const currentPlant = plants[currentQuestionIndex];
+            
+            // Show the current leaf image
+            leafImage.src = `/images/${currentPlant}_leaf.png`;
+            leafImage.alt = `${currentPlant} leaf`;
+            
+            // Create options (one correct, two incorrect)
+            const optionsPlants = getOptions(currentPlant);
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add new options
+            optionsPlants.forEach(plant => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
                 
-                // Add active class to clicked button and corresponding content
-                button.classList.add('active');
-                const tabId = button.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
+                const optionImage = document.createElement('img');
+                optionImage.src = `/images/${plant}_fern.png`;
+                optionImage.alt = `${plant} fern`;
                 
-                // Initialize the appropriate game if needed
-                if (tabId === 'quiz' && quizQuestions.length === 0) {
-                    initializeQuizGame();
+                optionElement.appendChild(optionImage);
+                optionElement.setAttribute('data-plant', plant);
+                
+                // Add click handler
+                optionElement.addEventListener('click', () => selectOption(optionElement, plant, currentPlant));
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update buttons
+            prevButton.disabled = currentQuestionIndex === 0;
+            nextButton.disabled = !answeredQuestions[currentQuestionIndex];
+            
+            // Clear feedback
+            hideFeedback();
+            
+            // If this question was answered before, show the answer
+            if (answeredQuestions[currentQuestionIndex]) {
+                showPreviousAnswer();
+            }
+        }
+        
+        // Get options (one correct, two random incorrect)
+        function getOptions(correctPlant) {
+            // Get incorrect options (plants that aren't the correct one)
+            const incorrectOptions = plantNames.filter(plant => plant !== correctPlant);
+            
+            // Shuffle and take two or fewer if there aren't enough options
+            const numIncorrectToSelect = Math.min(2, incorrectOptions.length);
+            const selectedIncorrect = shuffleArray(incorrectOptions).slice(0, numIncorrectToSelect);
+            
+            // Combine with correct and shuffle
+            return shuffleArray([correctPlant, ...selectedIncorrect]);
+        }
+        
+        // Handle option selection
+        function selectOption(optionElement, selectedPlant, correctPlant) {
+            // If already answered, do nothing
+            if (answeredQuestions[currentQuestionIndex]) {
+                return;
+            }
+            
+            const isCorrect = selectedPlant === correctPlant;
+            
+            // Mark the option as correct/incorrect
+            optionElement.classList.add(isCorrect ? 'correct' : 'incorrect');
+            
+            // Find and mark the correct option if the selected one was incorrect
+            if (!isCorrect) {
+                const options = optionsContainer.querySelectorAll('.option');
+                options.forEach(option => {
+                    if (option.getAttribute('data-plant') === correctPlant) {
+                        option.classList.add('correct');
+                    }
+                });
+            }
+            
+            // Update score if correct
+            if (isCorrect) {
+                score++;
+                scoreElement.textContent = score;
+            }
+            
+            // Show feedback
+            showFeedback(isCorrect);
+            
+            // Save the answer
+            answeredQuestions[currentQuestionIndex] = {
+                selectedPlant,
+                isCorrect
+            };
+            
+            // Enable next button
+            nextButton.disabled = false;
+            
+            // Check if game is over
+            if (Object.keys(answeredQuestions).length === plants.length) {
+                setTimeout(() => {
+                    finalScoreElement.textContent = score;
+                    questionSection.style.display = 'none';
+                    gameOverSection.style.display = 'block';
+                }, 1500);
+            }
+        }
+        
+        // Show feedback message
+        function showFeedback(isCorrect) {
+            feedbackElement.textContent = isCorrect ? 'Correct! 🎉' : 'Incorrect! Try again on the next one.';
+            feedbackElement.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+            feedbackElement.style.display = 'block';
+        }
+        
+        // Hide feedback message
+        function hideFeedback() {
+            feedbackElement.style.display = 'none';
+        }
+        
+        // Show previous answer for a revisited question
+        function showPreviousAnswer() {
+            const answer = answeredQuestions[currentQuestionIndex];
+            const options = optionsContainer.querySelectorAll('.option');
+            
+            options.forEach(option => {
+                const plant = option.getAttribute('data-plant');
+                if (plant === plants[currentQuestionIndex]) {
+                    option.classList.add('correct');
+                } else if (plant === answer.selectedPlant && !answer.isCorrect) {
+                    option.classList.add('incorrect');
                 }
             });
-        });
-
-        // Functions for standard mode
+            
+            // Show feedback
+            showFeedback(answer.isCorrect);
+        }
+        
+        // Navigate to previous question
+        function goToPrevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+        
+        // Navigate to next question
+        function goToNextQuestion() {
+            if (currentQuestionIndex < plants.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            }
+        }
+        
+        // Fisher-Yates shuffle algorithm
         function shuffleArray(array) {
             const newArray = [...array];
             for (let i = newArray.length - 1; i > 0; i--) {
@@ -590,312 +488,14 @@
             }
             return newArray;
         }
-
-        function createTreeItem(tree, type) {
-            const item = document.createElement('div');
-            item.classList.add('item');
-            item.dataset.id = tree.id;
-            item.dataset.type = type;
-            
-            const img = document.createElement('img');
-            img.classList.add('item-img');
-            img.src = `images/${tree.id}_${type}.png`;
-            img.alt = `${tree.german} ${type}`;
-            
-            const nameSpan = document.createElement('span');
-            nameSpan.classList.add('item-name');
-            nameSpan.textContent = `${tree.german} (${tree.english})`;
-            
-            item.appendChild(img);
-            
-            // Add names based on the selected game mode
-            const gameMode = document.querySelector('input[name="gameMode"]:checked').value;
-            
-            if (gameMode === "names-both" || (gameMode === "names-leaf" && type === "leaf")) {
-                item.appendChild(nameSpan);
-            }
-            
-            if (correctMatches.includes(tree.id)) {
-                item.classList.add('correct');
-                item.style.pointerEvents = 'none';
-            } else {
-                item.addEventListener('click', handleItemClick);
-            }
-            
-            return item;
-        }
-
-        function handleItemClick(e) {
-            const clickedItem = e.currentTarget;
-            const itemId = clickedItem.dataset.id;
-            const itemType = clickedItem.dataset.type;
-            
-            if (itemType === 'leaf') {
-                // Deselect previously selected leaf
-                if (selectedLeaf) {
-                    selectedLeaf.classList.remove('selected');
-                }
-                
-                if (selectedLeaf === clickedItem) {
-                    selectedLeaf = null;
-                } else {
-                    clickedItem.classList.add('selected');
-                    selectedLeaf = clickedItem;
-                }
-            } else if (itemType === 'fern') {
-                // Deselect previously selected fern
-                if (selectedFern) {
-                    selectedFern.classList.remove('selected');
-                }
-                
-                if (selectedFern === clickedItem) {
-                    selectedFern = null;
-                } else {
-                    clickedItem.classList.add('selected');
-                    selectedFern = clickedItem;
-                }
-            }
-            
-            // Check if both a leaf and fern are selected
-            if (selectedLeaf && selectedFern) {
-                checkMatch();
-            }
-        }
-
-        function checkMatch() {
-            const leafId = selectedLeaf.dataset.id;
-            const fernId = selectedFern.dataset.id;
-            
-            if (leafId === fernId) {
-                // Correct match
-                selectedLeaf.classList.add('correct');
-                selectedFern.classList.add('correct');
-                selectedLeaf.classList.remove('selected');
-                selectedFern.classList.remove('selected');
-                
-                selectedLeaf.style.pointerEvents = 'none';
-                selectedFern.style.pointerEvents = 'none';
-                
-                correctMatches.push(leafId);
-                score++;
-                scoreElement.textContent = score;
-                
-                // Check if game is complete
-                if (score === trees.length) {
-                    setTimeout(() => {
-                        alert('Congratulations! You matched all trees correctly!');
-                    }, 500);
-                }
-            } else {
-                // Incorrect match
-                selectedLeaf.classList.add('incorrect');
-                selectedFern.classList.add('incorrect');
-                
-                setTimeout(() => {
-                    selectedLeaf.classList.remove('incorrect');
-                    selectedFern.classList.remove('incorrect');
-                    selectedLeaf.classList.remove('selected');
-                    selectedFern.classList.remove('selected');
-                    selectedLeaf = null;
-                    selectedFern = null;
-                }, 1000);
-            }
-        }
-
-        function showHint() {
-            if (selectedLeaf && !selectedFern) {
-                const leafId = selectedLeaf.dataset.id;
-                const fernItems = document.querySelectorAll('.ferns-container .item');
-                
-                fernItems.forEach(item => {
-                    if (item.dataset.id === leafId) {
-                        item.style.border = '3px dashed orange';
-                        setTimeout(() => {
-                            item.style.border = '';
-                        }, 2000);
-                    }
-                });
-            } else if (!selectedLeaf && selectedFern) {
-                const fernId = selectedFern.dataset.id;
-                const leafItems = document.querySelectorAll('.leaves-container .item');
-                
-                leafItems.forEach(item => {
-                    if (item.dataset.id === fernId) {
-                        item.style.border = '3px dashed orange';
-                        setTimeout(() => {
-                            item.style.border = '';
-                        }, 2000);
-                    }
-                });
-            } else {
-                alert('Select either a leaf or a seed/fruit/cone first to get a hint for its match.');
-            }
-        }
-
-        function initializeStandardGame() {
-            // Clear previous game
-            leavesList.innerHTML = '';
-            fernsList.innerHTML = '';
-            selectedLeaf = null;
-            selectedFern = null;
-            correctMatches = [];
-            score = 0;
-            scoreElement.textContent = score;
-            
-            // Create shuffled arrays of trees
-            const shuffledLeaves = shuffleArray(trees);
-            const shuffledFerns = shuffleArray(trees);
-            
-            // Create leaf items
-            shuffledLeaves.forEach(tree => {
-                const leafItem = createTreeItem(tree, 'leaf');
-                leavesList.appendChild(leafItem);
-            });
-            
-            // Create fern items
-            shuffledFerns.forEach(tree => {
-                const fernItem = createTreeItem(tree, 'fern');
-                fernsList.appendChild(fernItem);
-            });
-        }
         
-        // Functions for quiz mode
-        function initializeQuizGame() {
-            // Reset game state
-            quizQuestions = [];
-            currentQuestionIndex = 0;
-            quizScore = 0;
-            answeredCurrent = false;
-            quizScoreElement.textContent = quizScore;
-            quizProgressElement.textContent = currentQuestionIndex + 1;
-            
-            // Create questions
-            const shuffledTrees = shuffleArray([...trees]);
-            
-            shuffledTrees.forEach(correctTree => {
-                // Get 3 random incorrect options
-                const incorrectOptions = shuffleArray(
-                    trees.filter(tree => tree.id !== correctTree.id)
-                ).slice(0, 3);
-                
-                // Create question with 4 options (1 correct, 3 incorrect)
-                const question = {
-                    correctTree: correctTree,
-                    options: shuffleArray([correctTree, ...incorrectOptions])
-                };
-                
-                quizQuestions.push(question);
-            });
-            
-            // Show first question
-            showQuizQuestion();
-        }
+        // Event listeners
+        prevButton.addEventListener('click', goToPrevQuestion);
+        nextButton.addEventListener('click', goToNextQuestion);
+        restartButton.addEventListener('click', initGame);
         
-        function showQuizQuestion() {
-            if (currentQuestionIndex >= quizQuestions.length) {
-                // Game completed
-                showFinalScore();
-                return;
-            }
-            
-            // Reset question state
-            answeredCurrent = false;
-            selectedOption = null;
-            quizConfirmBtn.disabled = false;
-            
-            const question = quizQuestions[currentQuestionIndex];
-            
-            // Set leaf image
-            quizLeafImg.src = `images/${question.correctTree.id}_leaf.png`;
-            quizLeafImg.alt = `${question.correctTree.german} leaf`;
-            
-            // Update progress
-            quizProgressElement.textContent = currentQuestionIndex + 1;
-            
-            // Clear previous options
-            quizOptions.innerHTML = '';
-            
-            // Add options
-            question.options.forEach((tree, index) => {
-                const option = document.createElement('div');
-                option.classList.add('quiz-option');
-                option.dataset.id = tree.id;
-                
-                const img = document.createElement('img');
-                img.classList.add('quiz-option-img');
-                img.src = `images/${tree.id}_fern.png`;
-                img.alt = `${tree.german} seed/fruit/cone`;
-                
-                const name = document.createElement('div');
-                name.classList.add('quiz-option-name');
-                name.textContent = `${tree.german} (${tree.english})`;
-                
-                option.appendChild(img);
-                option.appendChild(name);
-                
-                // Add click handlers
-                option.addEventListener('click', () => selectOption(option));
-                img.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent triggering the parent's click event
-                    toggleImageSize(img);
-                });
-                
-                quizOptions.appendChild(option);
-            });
-        }
-        
-        function selectOption(option) {
-            if (answeredCurrent) return; // Prevent selection after answer is confirmed
-            
-            // Clear previous selection
-            const options = document.querySelectorAll('.quiz-option');
-            options.forEach(opt => opt.classList.remove('selected'));
-            
-            // Select new option
-            option.classList.add('selected');
-            selectedOption = option;
-        }
-        
-        function toggleImageSize(img) {
-            if (answeredCurrent) return; // Prevent enlarging after answer is confirmed
-            
-            if (img.classList.contains('enlarged')) {
-                // Shrink image
-                img.classList.remove('enlarged');
-                overlay.style.display = 'none';
-            } else {
-                // Enlarge image
-                img.classList.add('enlarged');
-                overlay.style.display = 'block';
-                
-                // Center image on screen
-                const rect = img.getBoundingClientRect();
-                img.style.transform = `translate(-50%, -50%) scale(2.5)`;
-                
-                // Add click event to overlay to close enlarged image
-                overlay.onclick = () => {
-                    img.classList.remove('enlarged');
-                    overlay.style.display = 'none';
-                };
-            }
-        }
-        
-        function confirmAnswer() {
-            if (!selectedOption || answeredCurrent) return;
-            
-            answeredCurrent = true;
-            const correctId = quizQuestions[currentQuestionIndex].correctTree.id;
-            const selectedId = selectedOption.dataset.id;
-            
-            // Mark correct and incorrect options
-            const options = document.querySelectorAll('.quiz-option');
-            options.forEach(option => {
-                if (option.dataset.id === correctId) {
-                    option.classList.add('correct');
-                } else if (option.dataset.id === selectedId && selectedId !== correctId) {
-                    option.classList.add('incorrect');
-                }
-                
-                // Disable click events
-                option.style.pointerEvents = 'none';
-            });
+        // Start the application
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
