@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plants R Cool</title>
+  <title>Leaf-Fern Matching Game</title>
   <style>
     :root {
       --primary-color: #2c3e50;
@@ -62,7 +62,7 @@
       gap: 15px;
     }
 
-    .toggle-names {
+    .toggle-mode {
       background-color: var(--secondary-color);
       color: white;
       border: none;
@@ -73,8 +73,33 @@
       transition: background-color 0.3s;
     }
 
-    .toggle-names:hover {
-      background-color: #2980b9;
+    .toggle-mode.hard-mode {
+      background-color: #f39c12;
+    }
+
+    .toggle-mode:hover {
+      filter: brightness(1.1);
+    }
+
+    .name-input-container {
+      margin-top: 15px;
+      display: none;
+    }
+
+    .name-input {
+      padding: 10px;
+      border: 2px solid var(--primary-color);
+      border-radius: 5px;
+      font-size: 16px;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .name-feedback {
+      margin-top: 10px;
+      font-weight: bold;
+      height: 20px;
     }
 
     .game-container {
@@ -202,6 +227,10 @@
       color: var(--error-color);
     }
 
+    .feedback.partial {
+      color: #f39c12;
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -280,6 +309,79 @@
       background-color: #2980b9;
     }
 
+    .score-history-container {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .score-history-title {
+      font-size: 22px;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .score-history-list {
+      background-color: var(--background-color);
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .score-history-item {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .score-history-item:last-child {
+      border-bottom: none;
+    }
+
+    .no-history {
+      text-align: center;
+      color: #777;
+      padding: 20px;
+    }
+
+    .history-score {
+      font-weight: bold;
+    }
+
+    .history-score.high {
+      color: var(--success-color);
+    }
+
+    .history-date {
+      color: #777;
+    }
+
+    .history-mode {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    .history-mode.hard {
+      background-color: #f39c12;
+    }
+
+    .clear-history {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      margin-top: 10px;
+      cursor: pointer;
+      float: right;
+    }
+
     @media (max-width: 600px) {
       .ferns-container {
         grid-template-columns: 1fr;
@@ -296,7 +398,7 @@
   <div class="score-container">
     <div class="score">Score: <span id="current-score">0</span>/<span id="total-questions">0</span></div>
     <div class="options">
-      <button id="toggle-names" class="toggle-names">Hide Leaf Names</button>
+      <button id="toggle-mode" class="toggle-mode">Hard Mode</button>
     </div>
   </div>
 
@@ -304,6 +406,13 @@
     <div class="leaf-container">
       <h2 id="leaf-name" class="leaf-name">Name of Leaf</h2>
       <img id="leaf-image" class="leaf-image" src="" alt="Leaf image">
+      <div id="name-input-container" class="name-input-container">
+        <div style="display: flex; max-width: 300px; margin: 0 auto; gap: 10px;">
+          <input type="text" id="name-input" class="name-input" placeholder="Type leaf name...">
+          <button id="check-name-button" class="toggle-mode" style="white-space: nowrap;">OK</button>
+        </div>
+        <div id="name-feedback" class="name-feedback"></div>
+      </div>
     </div>
 
     <div id="ferns-container" class="ferns-container">
@@ -327,6 +436,14 @@
     <p class="final-score">Your score: <span id="final-score" class="score-highlight">0</span>/<span
         id="max-score">0</span></p>
     <button id="restart-button" class="restart-button">Play Again</button>
+
+    <div class="score-history-container">
+      <h3 class="score-history-title">Score History</h3>
+      <div id="score-history-list" class="score-history-list">
+        <div class="no-history">No previous scores yet</div>
+      </div>
+      <button id="clear-history" class="clear-history">Clear History</button>
+    </div>
   </div>
 
   <div id="zoom-modal" class="modal">
@@ -341,9 +458,12 @@
     let pairs = [];
     let currentIndex = 0;
     let score = 0;
-    let showNames = true;
+    let hardMode = false;
     let hasAnswered = false;
     let gameCompleted = false;
+    let fernScored = false;
+    let nameScored = false;
+    let scoreHistory = [];
 
     // Define all tree types from the image (15 total)
     const allTreeTypes = [
@@ -371,7 +491,8 @@
       allTreeTypes.forEach(tree => {
         pairs.push({
           leaf: `${tree}_leaf`,
-          fern: `${tree}_fern`
+          fern: `${tree}_fern`,
+          name: tree
         });
       });
 
@@ -387,7 +508,11 @@
       score = 0;
       document.getElementById('current-score').textContent = score;
       hasAnswered = false;
+      fernScored = false;
+      nameScored = false;
       gameCompleted = false;
+      fernScored = false;
+      nameScored = false;
 
       // Show game container and hide results
       document.getElementById('game-container').style.display = 'flex';
@@ -405,10 +530,108 @@
       }
     }
 
+    // Load score history from localStorage
+    function loadScoreHistory() {
+      const savedHistory = localStorage.getItem('leafFernScoreHistory');
+      if (savedHistory) {
+        scoreHistory = JSON.parse(savedHistory);
+      }
+      updateScoreHistoryDisplay();
+    }
+
+    // Save score history to localStorage
+    function saveScoreHistory() {
+      localStorage.setItem('leafFernScoreHistory', JSON.stringify(scoreHistory));
+      updateScoreHistoryDisplay();
+    }
+
+    // Update the score history display
+    function updateScoreHistoryDisplay() {
+      const historyList = document.getElementById('score-history-list');
+
+      if (scoreHistory.length === 0) {
+        historyList.innerHTML = '<div class="no-history">No previous scores yet</div>';
+        return;
+      }
+
+      // Sort by date (newest first)
+      const sortedHistory = [...scoreHistory].sort((a, b) => b.date - a.date);
+
+      historyList.innerHTML = '';
+
+      sortedHistory.forEach(entry => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'score-history-item';
+
+        const scorePercent = Math.round((entry.score / entry.total) * 100);
+        const isHighScore = scorePercent >= 80;
+
+        const date = new Date(entry.date);
+        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+
+        historyItem.innerHTML = `
+                    <div>
+                        <span class="history-score ${isHighScore ? 'high' : ''}">${entry.score}/${entry.total} (${scorePercent}%)</span>
+                        <span class="history-mode ${entry.hardMode ? 'hard' : ''}">${entry.hardMode ? 'Hard' : 'Normal'}</span>
+                    </div>
+                    <div class="history-date">${formattedDate}</div>
+                `;
+
+        historyList.appendChild(historyItem);
+      });
+    }
+
+    // Clear score history
+    function clearScoreHistory() {
+      if (confirm('Are you sure you want to clear all score history?')) {
+        scoreHistory = [];
+        saveScoreHistory();
+      }
+    }
+
     // Format the display name from the file name
     function formatDisplayName(filename) {
-      const parts = filename.split('_');
-      return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+      if (typeof filename === 'string') {
+        const parts = filename.split('_');
+        return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+      }
+      return filename.charAt(0).toUpperCase() + filename.slice(1);
+    }
+
+    // Toggle hard mode
+    function toggleHardMode() {
+      hardMode = !hardMode;
+      const toggleButton = document.getElementById('toggle-mode');
+      const nameInputContainer = document.getElementById('name-input-container');
+      const leafName = document.getElementById('leaf-name');
+
+      if (hardMode) {
+        toggleButton.textContent = 'Easy Mode';
+        toggleButton.classList.add('hard-mode');
+        nameInputContainer.style.display = 'block';
+        leafName.style.display = 'none';
+      } else {
+        toggleButton.textContent = 'Hard Mode';
+        toggleButton.classList.remove('hard-mode');
+        nameInputContainer.style.display = 'none';
+        leafName.style.display = 'block';
+      }
+
+      // Reset current question
+      hasAnswered = false;
+      fernScored = false;
+      nameScored = false;
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('feedback').className = 'feedback';
+      document.getElementById('name-feedback').textContent = '';
+      document.getElementById('name-input').value = '';
+
+      const fernOptions = document.querySelectorAll('.fern-option');
+      fernOptions.forEach(option => {
+        option.classList.remove('correct', 'incorrect');
+      });
+
+      document.getElementById('next-button').disabled = true;
     }
 
     // Load a question
@@ -425,7 +648,9 @@
       leafImage.src = `images/${currentPair.leaf}.png`;
       leafImage.alt = formatDisplayName(currentPair.leaf);
 
-      document.getElementById('leaf-name').textContent = formatDisplayName(currentPair.leaf);
+      document.getElementById('leaf-name').textContent = formatDisplayName(currentPair.name);
+      document.getElementById('name-input').value = '';
+      document.getElementById('name-feedback').textContent = '';
 
       // Clear previous fern options
       const fernsContainer = document.getElementById('ferns-container');
@@ -472,8 +697,8 @@
         fernOption.appendChild(zoomIcon);
 
         fernOption.addEventListener('click', () => {
-          if (!hasAnswered) {
-            checkAnswer(fern);
+          if (!fernScored) {
+            checkFernAnswer(fern);
           }
         });
 
@@ -490,18 +715,26 @@
       hasAnswered = false;
     }
 
-    // Check the selected answer
-    function checkAnswer(selectedFern) {
+    // Check the selected fern answer
+    function checkFernAnswer(selectedFern) {
       const correctFern = pairs[currentIndex].fern;
       const isCorrect = selectedFern === correctFern;
 
       if (isCorrect) {
-        score++;
-        document.getElementById('current-score').textContent = score;
-        document.getElementById('feedback').textContent = 'Correct!';
-        document.getElementById('feedback').className = 'feedback correct';
+        // In hard mode, this is worth 0.5 points
+        if (hardMode) {
+          score += 0.5;
+          document.getElementById('current-score').textContent = score;
+          document.getElementById('feedback').textContent = 'Fern: Correct! (+0.5)';
+          document.getElementById('feedback').className = 'feedback partial';
+        } else {
+          score += 1;
+          document.getElementById('current-score').textContent = score;
+          document.getElementById('feedback').textContent = 'Correct!';
+          document.getElementById('feedback').className = 'feedback correct';
+        }
       } else {
-        document.getElementById('feedback').textContent = 'Incorrect!';
+        document.getElementById('feedback').textContent = hardMode ? 'Fern: Incorrect!' : 'Incorrect!';
         document.getElementById('feedback').className = 'feedback incorrect';
       }
 
@@ -515,8 +748,87 @@
         }
       });
 
-      hasAnswered = true;
-      document.getElementById('next-button').disabled = false;
+      fernScored = true;
+      checkIfQuestionCompleted();
+    }
+
+    // Check the leaf name input
+    function checkNameInput() {
+      if (nameScored || !hardMode) return;
+
+      const correctName = pairs[currentIndex].name.toLowerCase();
+      const userInput = document.getElementById('name-input').value.trim().toLowerCase();
+
+      let isCorrect = false;
+
+      // Check for exact match or close match (allowing some flexibility)
+      if (userInput === correctName) {
+        isCorrect = true;
+      } else {
+        // Check for at least 70% similarity
+        const similarity = calculateStringSimilarity(userInput, correctName);
+        isCorrect = similarity >= 0.7;
+      }
+
+      const nameFeedback = document.getElementById('name-feedback');
+
+      if (isCorrect) {
+        score += 0.5;
+        document.getElementById('current-score').textContent = score;
+        nameFeedback.textContent = 'Name: Correct! (+0.5)';
+        nameFeedback.style.color = 'var(--success-color)';
+      } else {
+        nameFeedback.textContent = `Name: Incorrect! (${formatDisplayName(correctName)})`;
+        nameFeedback.style.color = 'var(--error-color)';
+      }
+
+      nameScored = true;
+      checkIfQuestionCompleted();
+    }
+
+    // Simple string similarity calculation (Levenshtein distance based)
+    function calculateStringSimilarity(a, b) {
+      if (a.length === 0) return b.length === 0 ? 1 : 0;
+      if (b.length === 0) return 0;
+
+      const matrix = [];
+
+      // Initialize matrix
+      for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+      }
+
+      for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+      }
+
+      // Fill matrix
+      for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+          const cost = a[j - 1] === b[i - 1] ? 0 : 1;
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,      // deletion
+            matrix[i][j - 1] + 1,      // insertion
+            matrix[i - 1][j - 1] + cost // substitution
+          );
+        }
+      }
+
+      const distance = matrix[b.length][a.length];
+      const maxLength = Math.max(a.length, b.length);
+
+      return maxLength === 0 ? 1 : (1 - distance / maxLength);
+    }
+
+    // Check if the current question is completed
+    function checkIfQuestionCompleted() {
+      if (hardMode) {
+        hasAnswered = fernScored && nameScored;
+      } else {
+        hasAnswered = fernScored;
+      }
+
+      document.getElementById('next-button').disabled = !hasAnswered;
     }
 
     // Show the zoomed image modal
@@ -549,6 +861,18 @@
     // Show game results
     function showResults() {
       gameCompleted = true;
+
+      // Add score to history
+      const scoreEntry = {
+        score: score,
+        total: pairs.length,
+        date: Date.now(),
+        hardMode: hardMode
+      };
+
+      scoreHistory.push(scoreEntry);
+      saveScoreHistory();
+
       document.getElementById('game-container').style.display = 'none';
       document.getElementById('results-container').style.display = 'block';
       document.getElementById('final-score').textContent = score;
@@ -556,14 +880,27 @@
 
     // Event listeners
     document.addEventListener('DOMContentLoaded', () => {
+      // Load score history
+      loadScoreHistory();
+
       // Initialize the game
       initGame();
 
-      // Toggle leaf names
-      document.getElementById('toggle-names').addEventListener('click', () => {
-        showNames = !showNames;
-        document.getElementById('leaf-name').style.opacity = showNames ? 1 : 0;
-        document.getElementById('toggle-names').textContent = showNames ? 'Hide Leaf Names' : 'Show Leaf Names';
+      // Toggle hard mode
+      document.getElementById('toggle-mode').addEventListener('click', toggleHardMode);
+
+      // Name input events
+      document.getElementById('name-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !nameScored) {
+          checkNameInput();
+        }
+      });
+
+      // Add OK button for name input
+      document.getElementById('check-name-button').addEventListener('click', () => {
+        if (!nameScored) {
+          checkNameInput();
+        }
       });
 
       // Navigation buttons
@@ -572,6 +909,9 @@
 
       // Restart button
       document.getElementById('restart-button').addEventListener('click', initGame);
+
+      // Clear history button
+      document.getElementById('clear-history').addEventListener('click', clearScoreHistory);
 
       // Close modal
       document.getElementById('close-modal').addEventListener('click', () => {
